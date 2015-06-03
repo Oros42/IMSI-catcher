@@ -19,7 +19,7 @@ sudo apt-get install gnuradio git python-scapy
 git clone https://github.com/pybombs/pybombs.git
 cd pybombs
 ```
-/!\ when "./pybombs config" set "/usr/local" when it ask "prefix" :  
+/!\ when "./pybombs config" ask for "prefix", set "/usr/local" :  
 prefix [/tmp/target]:/usr/local  
 ```
 ./pybombs config
