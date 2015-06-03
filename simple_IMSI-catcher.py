@@ -47,6 +47,7 @@ airprobe_rtlsdr.py
 # ...
 #
 # Now, watch terminal 1 and wait. IMSI number should appear :-)
+# If nothing appear after 1 min, change the frequency.
 #
 # Doc : https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications
 # Example of frequency : 9.288e+08 Bouygues
