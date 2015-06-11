@@ -46,7 +46,7 @@ In terminal 2
 ```
 airprobe_rtlsdr.py
 ```
-Now, change the frequency and stop it when you have out put like :  
+Now, change the frequency and stop it when you have output like :  
 ```
 15 06 21 00 01 f0 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b
 25 06 21 00 05 f4 f8 68 03 26 23 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b
