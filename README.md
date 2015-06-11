@@ -1,5 +1,5 @@
 # IMSI-catcher
-This program show you IMSI numbers of cellphones around you.  
+This program shows you IMSI numbers of cellphones around you.  
   
 /!\ This program was made to understand how GSM network work. Not for bad hacking !  
   
@@ -53,8 +53,8 @@ Now, change the frequency and stop it when you have output like :
 49 06 1b 95 cc 02 f8 02 01 9c c8 03 1e 57 a5 01 79 00 00 1c 13 2b 2b
 ...
 ```
-Now, watch terminal 1 and wait. IMSI number should appear :-)  
-If nothing appear after 1 min, change the frequency.  
+Now, watch terminal 1 and wait. IMSI numbers should appear :-)  
+If nothing appears after 1 min, change the frequency.  
   
 Doc : https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications  
 Example of frequency : 9.288e+08 Bouygues  
