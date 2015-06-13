@@ -9,9 +9,10 @@ This program shows you IMSI numbers of cellphones around you.
 
 What you need
 =============
-1 PC with more than 3Go of RAM to compile gr-gsm  
+1 PC with more than 3Go of RAM * to compile gr-gsm  
 1 USB DVB-T key (RTL2832U) with antenna (less than 15$)  
   
+\* *On EEEPC 1000H with 2Go of RAM and 2Go of swap, compiling take 1 day.*  
   
 Setup
 =====
