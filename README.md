@@ -19,7 +19,7 @@ Setup
 
 ```
 cd /tmp
-sudo apt-get install gnuradio git python-scapy
+sudo apt-get install git python-scapy
 git clone https://github.com/pybombs/pybombs.git
 cd pybombs
 ```
