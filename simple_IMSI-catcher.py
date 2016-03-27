@@ -19,19 +19,14 @@ What you need :
 Setup :
 
 cd /tmp
-sudo apt-get install git python-scapy
-git clone https://github.com/pybombs/pybombs.git
-cd pybombs
-
-# /!\ when "./pybombs config" ask for "prefix", set "/usr/local" :
-# prefix [/tmp/target]:/usr/local
-./pybombs config
-
-sudo ./pybombs install gr-gsm
-echo "[grc]
-local_blocks_path=/usr/local/share/gnuradio/grc/blocks
-">~/.gnuradio/config.conf
-
+sudo apt-get install git python-scapy python-pip
+sudo pip install PyBOMBS
+sudo pybombs prefix init /usr/local -a default_prx
+sudo pybombs config default_prefix default_prx
+sudo pybombs recipes add gr-recipes git+https://github.com/gnuradio/gr-recipes.git
+sudo pybombs recipes add gr-etcetera git+https://github.com/gnuradio/gr-etcetera.git
+sudo pybombs install gr-gsm
+sudo ldconfig
 
 Run :
 
