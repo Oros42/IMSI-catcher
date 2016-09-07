@@ -73,13 +73,14 @@ def show_imsi(imsi):
 			new_imsi+=str(c[3])+str(c[2])
 		else:
 			new_imsi+=str(c[2])+"0"
-	new_imsi=new_imsi[1:4]+" "+new_imsi[4:6]+" "+new_imsi[6:8]+" "+new_imsi[8:]
+	new_imsi=new_imsi[1:4]+" "+new_imsi[4:6]+" "+new_imsi[6:11]+" "+new_imsi[11:]
 	if new_imsi not in imsis:
 		imsis.append(new_imsi)
 		print(new_imsi)
 
 def find_imsi(x):
 	p=str(x)
+	"""
 	if p[58:][:2] != '\x01+':
 		# if not (CCCH) (SS)
 		# GSM CCCH
@@ -94,5 +95,34 @@ def find_imsi(x):
 				if p[72:][:2] == '\x08\x29':
 					# if IMSI 2
 					show_imsi(p[73:][:8])
+	"""
+
+	# https://github.com/ptrkrysik/gr-gsm/wiki/Installation
+	# sudo grgsm_scanner -v -b P-GSM
+	# sudo grgsm_livemon -f 944200000
+	# works in China
+	# Channel Type: CCCH (2)
+	if ord(p[0x36]) == 0x2:
+		# Message Type: Paging Request Type 1
+		if ord(p[0x3c]) == 0x21:
+			# Channel 1: TCH/F (Full rate) (2)
+			if ord(p[0x3d]) == 0x20:
+				# Mobile Identity 1 Type: IMSI (1)
+				if ord(p[0x3e]) == 0x08 and (ord(p[0x3f]) & 0x1) == 0x1:
+					show_imsi(p[0x3f:][:8])
+			# Channel 1: TCH/F (Full rate) (2)
+			# Channel 2: TCH/F (Full rate) (2)
+			if ord(p[0x3d]) == 0xa0:
+				# Mobile Identity 1 Type: IMSI (1)
+				if ord(p[0x3e]) == 0x08 and (ord(p[0x3f]) & 0x1) == 0x1:
+					show_imsi(p[0x3f:][:8])
+				# Mobile Identity 2 Type: IMSI (1)
+				if ord(p[0x45]) == 0x08 and (ord(p[0x46]) & 0x1) == 0x1:
+					show_imsi(p[0x46:][:8])
+		# Message Type: Paging Request Type 2
+		elif ord(p[0x3c]) == 0x22:
+			# Mobile Identity 3 Type: IMSI (1)
+			if ord(p[0x47]) == 0x08 and (ord(p[0x48]) & 0x1) == 0x1:
+				show_imsi(p[0x48:][:8])
 
 sniff(iface="lo", filter="port 4729 and not icmp and udp", prn=find_imsi, store=0)
