@@ -9,24 +9,17 @@ This program shows you IMSI numbers of cellphones around you.
 
 What you need
 =============
-1 PC with more than 3Go of RAM * to compile gr-gsm  
+1 PC
 1 USB DVB-T key (RTL2832U) with antenna (less than 15$)  
   
-\* *On EEEPC 1000H with 2Go of RAM and 2Go of swap, compiling take 1 day.*  
   
 Setup
 =====
 
 ```
-cd /tmp
-sudo apt-get install git python-scapy python-pip
-sudo pip install PyBOMBS
-sudo pybombs prefix init /usr/local -a default_prx
-sudo pybombs config default_prefix default_prx
-sudo pybombs recipes add gr-recipes git+https://github.com/gnuradio/gr-recipes.git
-sudo pybombs recipes add gr-etcetera git+https://github.com/gnuradio/gr-etcetera.git
-sudo pybombs install gr-gsm
-sudo ldconfig
+sudo add-apt-repository -y ppa:ptrkrysik/gr-gsm
+sudo apt update
+sudo apt install gr-gsm python-numpy python-scipy python-scapy
 ```
 
 Run
