@@ -1,5 +1,5 @@
 # IMSI-catcher
-This program shows you IMSI numbers of cellphones around you.  
+This program shows you IMSI numbers, country, brand and operator of cellphones around you.  
   
 /!\ This program was made to understand how GSM network work. Not for bad hacking !  
   
@@ -9,7 +9,7 @@ This program shows you IMSI numbers of cellphones around you.
 
 What you need
 =============
-1 PC
+1 PC  
 1 USB DVB-T key (RTL2832U) with antenna (less than 15$)  
   
   
@@ -25,6 +25,7 @@ sudo apt install gr-gsm python-numpy python-scipy python-scapy
 Run
 ===
   
+Open 2 terminals.  
 In terminal 1  
 ```
 sudo python simple_IMSI-catcher.py
@@ -45,9 +46,9 @@ Now, watch terminal 1 and wait. IMSI numbers should appear :-)
 If nothing appears after 1 min, change the frequency.  
   
 Doc : https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications  
-Example of frequency : 9.288e+08 Bouygues  
+Example of frequency in France : 9.288e+08 Bouygues  
   
-You can watch GSM packet with  
+You can watch GSM packets with  
 ```
 sudo wireshark -k -Y '!icmp && gsmtap' -i lo
 ```
