@@ -93,7 +93,7 @@ def show_imsi(imsi, p):
 
 def find_imsi(x):
 	p=str(x)
-	if ord(p[0x36]) == 0x2:
+	if ord(p[0x36]) != 0x1: # Channel Type != BCCH (0)
 		if ord(p[0x3c]) == 0x21: # Message Type: Paging Request Type 1
 			if ord(p[0x3e]) == 0x08 and (ord(p[0x3f]) & 0x1) == 0x1: # Channel 1: TCH/F (Full rate) (2)
 				# Mobile Identity 1 Type: IMSI (1)

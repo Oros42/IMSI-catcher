@@ -58,7 +58,7 @@ Links
 
 Setup of Gr-Gsm : http://blog.nikseetharaman.com/gsm-network-characterization-using-software-defined-radio/  
 Frequency : https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications  
-Mobile Network Code : https://fr.wikipedia.org/wiki/Mobile_Network_Code  
+Mobile Network Code : https://en.wikipedia.org/wiki/Mobile_Network_Code  
 Scapy : http://secdev.org/projects/scapy/doc/usage.html  
 IMSI : https://fr.wikipedia.org/wiki/IMSI  
 Realtek RTL2832U : http://doc.ubuntu-fr.org/rtl2832u and http://doc.ubuntu-fr.org/rtl-sdr  
