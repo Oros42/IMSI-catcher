@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Author: Oros
 # Contributor : puyoulu
-# 2016/09/29
+# 2016/10/05
 # License : CC0 1.0 Universal
 
 """
@@ -14,7 +14,7 @@ This program shows you IMSI numbers of cellphones around you.
 
 What you need :
 1 PC
-1 USB DVB-T key (RTL2832U) with antenna (less than 15$)
+1 USB DVB-T key (RTL2832U) with antenna (less than 15$) or a OsmocomBB phone
 
 
 Setup :
@@ -25,6 +25,7 @@ sudo apt install gr-gsm python-numpy python-scipy python-scapy
 
 Run :
 
+# Open 2 terminals.
 # In terminal 1
 sudo python simple_IMSI-catcher.py
 

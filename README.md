@@ -10,7 +10,7 @@ This program shows you IMSI numbers, country, brand and operator of cellphones a
 What you need
 =============
 1 PC  
-1 USB DVB-T key (RTL2832U) with antenna (less than 15$)  
+1 USB DVB-T key (RTL2832U) with antenna (less than 15$) or a OsmocomBB phone  
   
   
 Setup
