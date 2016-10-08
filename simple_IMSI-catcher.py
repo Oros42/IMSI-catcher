@@ -82,11 +82,15 @@ def show_imsi(imsi, p):
 				# m=" : "+country+", "+brand+" - "+operator
 				m=" ; "+mcc_codes[mcc]['c'][0]+" ; "+mcc_codes[mcc]['MNC'][mnc][0]+" ; "+mcc_codes[mcc]['MNC'][mnc][1]
 				new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
-			elif mnc+"0" in mcc_codes[mcc]['MNC']:
-				mnc+="0"
+			elif mnc+new_imsi[6:7] in mcc_codes[mcc]['MNC']:
+				mnc+=new_imsi[6:7]
 				# m=" : "+country+", "+brand+" - "+operator
 				m=" ; "+mcc_codes[mcc]['c'][0]+" ; "+mcc_codes[mcc]['MNC'][mnc][0]+" ; "+mcc_codes[mcc]['MNC'][mnc][1]
 				new_imsi=mcc+" "+mnc+" "+new_imsi[7:]
+			else:
+				# m=" : "+country+", "+brand+" - "+operator
+				m=" ; "+mcc_codes[mcc]['c'][0]+" ; Unknown ; "+mcc_codes[mcc]['MNC'][mnc][1]
+				new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
 		else:
 			print("Error : ",p)
 		print(str(cpt)+" ; "+new_imsi+m)
