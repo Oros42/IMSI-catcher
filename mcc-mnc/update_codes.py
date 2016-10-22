@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Author: Oros
-# 2016/09/27
+# 2016/10/22
 # License : CC0 1.0 Universal
 
 # This scipt update mcc_codes.json from this page https://en.wikipedia.org/wiki/Mobile_Network_Code
@@ -21,6 +21,7 @@ except ImportError:
 
 import urllib2
 import json
+import io
 
 webpage = urllib2.urlopen('https://en.wikipedia.org/wiki/Mobile_Network_Code')
 soup = BeautifulSoup(webpage,'html.parser')
@@ -69,5 +70,5 @@ for t in soup.find_all("table", class_="wikitable"):
 		pass
 
 if mcc_codes:
-	with open('mcc_codes.json', 'w') as outfile:
-		json.dump(mcc_codes, outfile)
+	with io.open('mcc_codes.json', 'w', encoding='utf8') as outfile:
+		outfile.write(json.dumps(mcc_codes, ensure_ascii=False, encoding="utf-8"))

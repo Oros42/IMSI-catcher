@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Author: Oros
 # Contributor : puyoulu
-# 2016/10/05
+# 2016/10/22
 # License : CC0 1.0 Universal
 
 """
@@ -58,12 +58,29 @@ Realtek RTL2832U : http://doc.ubuntu-fr.org/rtl2832u and http://doc.ubuntu-fr.or
 
 from scapy.all import sniff
 import json
+from optparse import OptionParser
 
-imsis=[]
-cpt=1
-def show_imsi(imsi, p):
-	global imsis
-	global cpt
+imsis=[] # [IMSI,...]
+tmsis={} # {TMSI:IMSI,...}
+nb_IMSI=0 # count the number of IMSI
+
+
+# return something like '0xd9605460'
+def str_tmsi(tmsi):
+	if tmsi != "":
+		new_tmsi="0x"
+		for a in tmsi:
+			c=hex(ord(a))
+			if len(c)==4:
+				new_tmsi+=str(c[2])+str(c[3])
+			else:
+				new_tmsi+="0"+str(c[2])
+		return new_tmsi
+	else:
+		return ""
+
+# return something like '208 20 1752XXXXXX ; France ; Bouygues ; Bouygues Telecom'
+def str_imsi(imsi, p=""):
 	new_imsi=''
 	for a in imsi:
 		c=hex(ord(a))
@@ -72,37 +89,114 @@ def show_imsi(imsi, p):
 		else:
 			new_imsi+=str(c[2])+"0"
 	
-	if new_imsi not in imsis:
-		imsis.append(new_imsi)
-		mcc=new_imsi[1:4]
-		mnc=new_imsi[4:6]
-		m=""
-		if mcc in mcc_codes:
-			if mnc in mcc_codes[mcc]['MNC']:
-				# m=" : "+country+", "+brand+" - "+operator
-				m=" ; "+mcc_codes[mcc]['c'][0]+" ; "+mcc_codes[mcc]['MNC'][mnc][0]+" ; "+mcc_codes[mcc]['MNC'][mnc][1]
-				new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
-			elif mnc+new_imsi[6:7] in mcc_codes[mcc]['MNC']:
-				mnc+=new_imsi[6:7]
-				# m=" : "+country+", "+brand+" - "+operator
-				m=" ; "+mcc_codes[mcc]['c'][0]+" ; "+mcc_codes[mcc]['MNC'][mnc][0]+" ; "+mcc_codes[mcc]['MNC'][mnc][1]
-				new_imsi=mcc+" "+mnc+" "+new_imsi[7:]
-			else:
-				# m=" : "+country+", "+brand+" - "+operator
-				m=" ; "+mcc_codes[mcc]['c'][0]+" ; Unknown ; "+mcc_codes[mcc]['MNC'][mnc][1]
-				new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
+	mcc=new_imsi[1:4]
+	mnc=new_imsi[4:6]
+	country=""
+	brand=""
+	operator=""
+	if mcc in mcc_codes:
+		if mnc in mcc_codes[mcc]['MNC']:
+			country=mcc_codes[mcc]['c'][0]
+			brand=mcc_codes[mcc]['MNC'][mnc][0]
+			operator=mcc_codes[mcc]['MNC'][mnc][1]
+			new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
+		elif mnc+new_imsi[6:7] in mcc_codes[mcc]['MNC']:
+			mnc+=new_imsi[6:7]
+			country=mcc_codes[mcc]['c'][0]
+			brand=mcc_codes[mcc]['MNC'][mnc][0]
+			operator=mcc_codes[mcc]['MNC'][mnc][1]
+			new_imsi=mcc+" "+mnc+" "+new_imsi[7:]
 		else:
-			print("Error : ",p)
-		print(str(cpt)+" ; "+new_imsi+m)
-		cpt+=1
+			country=mcc_codes[mcc]['c'][0]
+			brand="Unknown"
+			operator=mcc_codes[mcc]['MNC'][mnc][1]
+			new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
+
+	try:
+		m="{:17s} ; {} ; {} ; {}".format(new_imsi, country.encode('utf-8'), brand.encode('utf-8'), operator.encode('utf-8'))
+	except:
+		m=""
+		print("Error", p, new_imsi, country, brand, operator)
+	return m
+
+# print TMSI, IMSI and operator's information
+def show_imsi(imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
+	global imsis
+	global tmsis
+	global nb_IMSI
+
+	do_print=False
+	n=''
+	if imsi1 and (not imsi_to_track or imsi1 == imsi_to_track):
+		if imsi1 not in imsis:
+			# new IMSI
+			do_print=True
+			imsis.append(imsi1)
+			nb_IMSI+=1
+			n=nb_IMSI
+		if tmsi1 and (tmsi1 not in tmsis or tmsis[tmsi1] != imsi1):
+			# new TMSI to an ISMI
+			do_print=True
+			tmsis[tmsi1]=imsi1
+		if tmsi2 and (tmsi2 not in tmsis or tmsis[tmsi2] != imsi1):
+			# new TMSI to an ISMI
+			do_print=True
+			tmsis[tmsi2]=imsi1		
+	
+	if imsi2 and (not imsi_to_track or imsi2 == imsi_to_track):
+		if imsi2 not in imsis:
+			# new IMSI
+			do_print=True
+			imsis.append(imsi2)
+			nb_IMSI+=1
+			n=nb_IMSI
+		if tmsi1 and (tmsi1 not in tmsis or tmsis[tmsi1] != imsi2):
+			# new TMSI to an ISMI
+			do_print=True
+			tmsis[tmsi1]=imsi2
+		if tmsi2 and (tmsi2 not in tmsis or tmsis[tmsi2] != imsi2):
+			# new TMSI to an ISMI
+			do_print=True
+			tmsis[tmsi2]=imsi2
+
+	if not imsi1 and not imsi2 and tmsi1 and tmsi2:
+		if tmsi2 in tmsis:
+			# switch the TMSI
+			do_print=True
+			imsi1=tmsis[tmsi2]
+			tmsis[tmsi1]=imsi1
+			del tmsis[tmsi2]
+
+	if do_print:
+		if imsi1:
+			print("{:7s} ; {:10s} ; {:10s} ; {}".format(str(n), str_tmsi(tmsi1), str_tmsi(tmsi2), str_imsi(imsi1, p)))
+		if imsi2:
+			print("{:7s} ; {:10s} ; {:10s} ; {}".format(str(n), str_tmsi(tmsi1), str_tmsi(tmsi2), str_imsi(imsi2, p)))
+
+	if not imsi1 and not imsi2 and show_all_tmsi:
+		do_print=False
+		if tmsi1 and tmsi1 not in tmsis:
+			do_print=True
+			tmsis[tmsi1]=""
+		if tmsi1 and tmsi1 not in tmsis:
+			do_print=True
+			tmsis[tmsi2]=""
+		if do_print:
+			print("{:7s} ; {:10s} ; {:10s} ; {}".format(str(n), str_tmsi(tmsi1), str_tmsi(tmsi2), "; ; ;"))
+
 
 def find_imsi(x):
 	p=str(x)
 	if ord(p[0x36]) != 0x1: # Channel Type != BCCH (0)
+		tmsi1=""
+		tmsi2=""
+		imsi1=""
+		imsi2=""
 		if ord(p[0x3c]) == 0x21: # Message Type: Paging Request Type 1
 			if ord(p[0x3e]) == 0x08 and (ord(p[0x3f]) & 0x1) == 0x1: # Channel 1: TCH/F (Full rate) (2)
 				# Mobile Identity 1 Type: IMSI (1)
 				"""
+				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
 				0010   00 43 1c d4 40 00 40 11 1f d4 7f 00 00 01 7f 00
 				0020   00 01 c2 e4 12 79 00 2f fe 42 02 04 01 00 00 00
@@ -111,12 +205,12 @@ def find_imsi(x):
 				0050   2b
 				XX XX XX XX XX XX XX XX = IMSI
 				"""
-				show_imsi(p[0x3f:][:8], p)
-
+				imsi1=p[0x3f:][:8]
 				# ord(p[0x3a]) == 0x59 = l2 pseudo length value: 22
 				if ord(p[0x3a]) == 0x59 and ord(p[0x48]) == 0x08 and (ord(p[0x49]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
 					# Mobile Identity 2 Type: IMSI (1)
 					"""
+				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
 				0010   00 43 90 95 40 00 40 11 ac 12 7f 00 00 01 7f 00
 				0020   00 01 b4 1c 12 79 00 2f fe 42 02 04 01 00 00 00
@@ -126,11 +220,28 @@ def find_imsi(x):
 				YY YY YY YY YY YY YY YY = IMSI 1
 				XX XX XX XX XX XX XX XX = IMSI 2
 					"""
-					show_imsi(p[0x49:][:8], p)
+					imsi2=p[0x49:][:8]
+				elif ord(p[0x3a]) == 0x59 and ord(p[0x48]) == 0x08 and (ord(p[0x49]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
+					# Mobile Identity - Mobile Identity 2 - IMSI
+					"""
+				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
+				0010   00 43 f6 92 40 00 40 11 46 15 7f 00 00 01 7f 00
+				0020   00 01 ab c1 12 79 00 2f fe 42 02 04 01 00 00 00
+				0030   d8 00 00 23 3e be 02 00 05 00 4d 06 21 a0 08 YY
+				0040   YY YY YY YY YY YY YY 17 05 f4 XX XX XX XX 2b 2b
+				0050   2b
+				YY YY YY YY YY YY YY YY = IMSI 1
+				XX XX XX XX = TMSI
+					"""
+					tmsi1=p[0x4a:][:4]
+
+				show_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
 
 			elif ord(p[0x45]) == 0x08 and (ord(p[0x46]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
 				# Mobile Identity 2 Type: IMSI (1)
 				"""
+				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
 				0010   00 43 57 8e 40 00 40 11 e5 19 7f 00 00 01 7f 00
 				0020   00 01 99 d4 12 79 00 2f fe 42 02 04 01 00 00 00
@@ -140,12 +251,34 @@ def find_imsi(x):
 				yy yy yy yy = TMSI/P-TMSI - Mobile Identity 1
 				XX XX XX XX XX XX XX XX = IMSI
 				"""
-				show_imsi(p[0x46:][:8], p)
+				tmsi1=p[0x40:][:4]
+				imsi2=p[0x46:][:8]
+				show_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
 
+			elif ord(p[0x3e]) == 0x05 and (ord(p[0x3f]) & 0x07) == 4: # Mobile Identity - Mobile Identity 1 - TMSI/P-TMSI 
+				"""
+				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
+				0010   00 43 b3 f7 40 00 40 11 88 b0 7f 00 00 01 7f 00
+				0020   00 01 ce 50 12 79 00 2f fe 42 02 04 01 00 03 fd
+				0030   d1 00 00 1b 03 5e 05 00 00 00 41 06 21 00 05 f4
+				0040   XX XX XX XX 17 05 f4 YY YY YY YY 2b 2b 2b 2b 2b
+				0050   2b
+				XX XX XX XX = TMSI/P-TMSI - Mobile Identity 1
+				YY YY YY YY = TMSI/P-TMSI - Mobile Identity 2
+				"""
+				tmsi1=p[0x40:][:4]
+				if ord(p[0x45]) == 0x05 and (ord(p[0x46]) & 0x07) == 4: # Mobile Identity - Mobile Identity 2 - TMSI/P-TMSI 
+					tmsi2=p[0x47:][:4]
+				else:
+					tmsi2=""
+
+				show_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
 
 		elif ord(p[0x3c]) == 0x22: # Message Type: Paging Request Type 2
 			if ord(p[0x47]) == 0x08 and (ord(p[0x48]) & 0x1) == 0x1: # Mobile Identity 3 Type: IMSI (1)
 				"""
+				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f				
 				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
 				0010   00 43 1c a6 40 00 40 11 20 02 7f 00 00 01 7f 00
 				0020   00 01 c2 e4 12 79 00 2f fe 42 02 04 01 00 00 00
@@ -156,11 +289,29 @@ def find_imsi(x):
 				zz zz zz zz = TMSI/P-TMSI - Mobile Identity 2
 				XX XX XX XX XX XX XX XX = IMSI
 				"""
-				show_imsi(p[0x48:][:8], p)
+				tmsi1=p[0x3e:][:4]
+				tmsi2=p[0x42:][:4]
+				imsi2=p[0x48:][:8]
+				show_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
+
+
+parser = OptionParser(usage="%prog: [options]")
+parser.add_option("-a", "--alltmsi", action="store_true", dest="show_all_tmsi", help="Show TMSI who haven't got IMSI (default  : false)")
+parser.add_option("-i", "--iface", dest="iface", default="lo", help="Interface (default : lo)")
+parser.add_option("-m", "--imsi", dest="imsi", default="", type="string", help='IMSI to track (default : None, Example: 123456789101112 or "123 45 6789101112")')
+parser.add_option("-p", "--port", dest="port", default="4729", type="int", help="Port (default : 4729)")
+(options, args) = parser.parse_args()
+
+show_all_tmsi=options.show_all_tmsi
+imsi_to_track=""
+if options.imsi:
+	imsi="9"+options.imsi.replace(" ", "")
+	for i in range(0,15,2):
+		imsi_to_track+=chr(int(imsi[i+1])*16+int(imsi[i]))
 
 # mcc codes form https://en.wikipedia.org/wiki/Mobile_Network_Code
-with open('mcc-mnc/mcc_codes.json') as file:    
+with open('mcc-mnc/mcc_codes.json', 'r') as file:
 	mcc_codes = json.load(file)
 
-print("cpt ; IMSI ; country ; brand ; operator")
-sniff(iface="lo", filter="port 4729 and not icmp and udp", prn=find_imsi, store=0)
+print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {} ; {} ; {}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator"))
+sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi, store=0)
