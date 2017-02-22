@@ -29,7 +29,8 @@ Open 2 terminals.
 In terminal 1  
 ```
 sudo python simple_IMSI-catcher.py
-```
+```  
+You can add -h to display options.  
 
 In terminal 2  
 ```
