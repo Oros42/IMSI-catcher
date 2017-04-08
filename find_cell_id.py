@@ -73,7 +73,7 @@ def find_cell(x):
 					country=mcc_codes[mcc]['c'][0]
 					brand="Unknown"
 					operator=mcc_codes[mcc]['MNC'][mnc][1]
-			print("{:5s} ; {:4s} ; {:5s} ; {:6s} ; {} ; {} ; {}".format(str(mcc), str(mnc), str(lac), str(cell), country, brand, operator))
+			print("{:5s} ; {:4s} ; {:5s} ; {:6s} ; {} ; {} ; {}".format(str(mcc), str(mnc), str(lac), str(cell), country.encode('utf-8'), brand.encode('utf-8'), operator.encode('utf-8')))
 
 parser = OptionParser(usage="%prog: [options]")
 parser.add_option("-p", "--port", dest="port", default="4729", type="int", help="Port (default : 4729)")
