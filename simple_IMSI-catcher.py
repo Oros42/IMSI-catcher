@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Author: Oros
-# Contributor : puyoulu
+# Contributors : puyoulu, 1kali2kali
 # 2016/10/22
 # License : CC0 1.0 Universal
 
