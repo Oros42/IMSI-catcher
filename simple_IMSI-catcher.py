@@ -269,8 +269,12 @@ def find_cell(x):
 					operator=mcc_codes[mcc]['MNC'][mnc][1]
 				else:
 					country=mcc_codes[mcc]['c'][0]
-					brand="Unknown"
-					operator=mcc_codes[mcc]['MNC'][mnc][1]
+					brand="Unknown MNC {}".format(mnc)
+					operator="Unknown MNC {}".format(mnc)
+			else:
+				country="Unknown MCC {}".format(mcc)
+				brand="Unknown MNC {}".format(mnc)
+				operator="Unknown MNC {}".format(mnc)
 			mcc=str(mcc)
 			mnc=str(mnc)
 			lac=str(lac)
