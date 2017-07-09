@@ -70,7 +70,7 @@ sudo python immediate_assignment_catcher.py
 Links
 =====
 
-Setup of Gr-Gsm : http://blog.nikseetharaman.com/gsm-network-characterization-using-software-defined-radio/  
+Setup of Gr-Gsm : https://github.com/ptrkrysik/gr-gsm/wiki/Installation  
 Frequency : https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications  
 Mobile Network Code : https://en.wikipedia.org/wiki/Mobile_Network_Code  
 Scapy : http://secdev.org/projects/scapy/doc/usage.html  
