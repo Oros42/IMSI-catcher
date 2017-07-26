@@ -75,8 +75,8 @@ Links
 =====
 
 Setup of Gr-Gsm : https://github.com/ptrkrysik/gr-gsm/wiki/Installation  
-Frequency : https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications  
+Frequency : http://www.worldtimezone.com/gsm.html and https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications  
 Mobile Network Code : https://en.wikipedia.org/wiki/Mobile_Network_Code  
 Scapy : http://secdev.org/projects/scapy/doc/usage.html  
 IMSI : https://fr.wikipedia.org/wiki/IMSI  
-Realtek RTL2832U : http://doc.ubuntu-fr.org/rtl2832u and http://doc.ubuntu-fr.org/rtl-sdr  
+Realtek RTL2832U : https://osmocom.org/projects/sdr/wiki/rtl-sdr and http://doc.ubuntu-fr.org/rtl2832u and http://doc.ubuntu-fr.org/rtl-sdr  
