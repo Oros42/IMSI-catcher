@@ -17,10 +17,14 @@ Setup
 =====
 
 ```
+sudo apt install python-numpy python-scipy python-scapy
+
 sudo add-apt-repository -y ppa:ptrkrysik/gr-gsm
 sudo apt update
-sudo apt install gr-gsm python-numpy python-scipy python-scapy
+sudo apt install gr-gsm
 ```
+If gr-gsm failled to setup. Try this setup : https://github.com/ptrkrysik/gr-gsm/wiki/Installation
+
 
 Run
 ===
