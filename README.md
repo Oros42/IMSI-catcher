@@ -10,7 +10,7 @@ This program shows you IMSI numbers, country, brand and operator of cellphones a
 What you need
 =============
 1 PC  
-1 USB DVB-T key (RTL2832U) with antenna (less than 15$) or a OsmocomBB phone  
+1 [USB DVB-T key (RTL2832U)](https://osmocom.org/projects/sdr/wiki/rtl-sdr) with antenna (less than 15$) or a [OsmocomBB phone](https://osmocom.org/projects/baseband/wiki/Phones)   or [HackRf](https://greatscottgadgets.com/hackrf/)  
   
   
 Setup
@@ -38,7 +38,7 @@ You can add -h to display options.
 
 In terminal 2  
 ```
-airprobe_rtlsdr.py
+grgsm_livemon
 ```
 Now, change the frequency and stop it when you have output like :  
 ```
