@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Author: Oros
 # Contributors : puyoulu, 1kali2kali
-# 2016/10/22
+# 2017/08/01
 # License : CC0 1.0 Universal
 
 """
@@ -14,14 +14,18 @@ This program shows you IMSI numbers of cellphones around you.
 
 What you need :
 1 PC
-1 USB DVB-T key (RTL2832U) with antenna (less than 15$) or a OsmocomBB phone
+1 USB DVB-T key (RTL2832U) with antenna (less than 15$) or a OsmocomBB phone or HackRf
 
 
 Setup :
 
+sudo apt install python-numpy python-scipy python-scapy
+
 sudo add-apt-repository -y ppa:ptrkrysik/gr-gsm
 sudo apt update
-sudo apt install gr-gsm python-numpy python-scipy python-scapy
+sudo apt install gr-gsm
+
+If gr-gsm failled to setup. Try this setup : https://github.com/ptrkrysik/gr-gsm/wiki/Installation
 
 Run :
 
@@ -142,7 +146,7 @@ def show_imsi(imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
 
 	do_print=False
 	n=''
-	if imsi1 and (not imsi_to_track or imsi1 == imsi_to_track):
+	if imsi1 and (not imsi_to_track or imsi1[:imsi_to_track_len] == imsi_to_track):
 		if imsi1 not in imsis:
 			# new IMSI
 			do_print=True
@@ -158,7 +162,7 @@ def show_imsi(imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
 			do_print=True
 			tmsis[tmsi2]=imsi1		
 	
-	if imsi2 and (not imsi_to_track or imsi2 == imsi_to_track):
+	if imsi2 and (not imsi_to_track or imsi2[:imsi_to_track_len] == imsi_to_track):
 		if imsi2 not in imsis:
 			# new IMSI
 			do_print=True
@@ -409,8 +413,22 @@ if __name__ == '__main__':
 	imsi_to_track=""
 	if options.imsi:
 		imsi="9"+options.imsi.replace(" ", "")
-		for i in range(0,15,2):
-			imsi_to_track+=chr(int(imsi[i+1])*16+int(imsi[i]))
+		imsi_to_track_len=len(imsi)
+		if imsi_to_track_len%2 == 0 and imsi_to_track_len > 0 and imsi_to_track_len <17:
+			for i in range(0, imsi_to_track_len-1, 2):
+				imsi_to_track+=chr(int(imsi[i+1])*16+int(imsi[i]))
+			imsi_to_track_len=len(imsi_to_track)
+		else:
+			print("Wrong size for the IMSI to track!")
+			print("Valid sizes :")
+			print("123456789101112")
+			print("1234567891011")
+			print("12345678910")
+			print("123456789")
+			print("1234567")
+			print("12345")
+			print("123")
+			exit(1)
 
 	# mcc codes form https://en.wikipedia.org/wiki/Mobile_Network_Code
 	with open('mcc-mnc/mcc_codes.json', 'r') as file:
