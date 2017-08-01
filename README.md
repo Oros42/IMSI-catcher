@@ -10,7 +10,7 @@ This program shows you IMSI numbers, country, brand and operator of cellphones a
 What you need
 =============
 1 PC  
-1 [USB DVB-T key (RTL2832U)](https://osmocom.org/projects/sdr/wiki/rtl-sdr) with antenna (less than 15$) or a [OsmocomBB phone](https://osmocom.org/projects/baseband/wiki/Phones)   or [HackRf](https://greatscottgadgets.com/hackrf/)  
+1 [USB DVB-T key (RTL2832U)](https://osmocom.org/projects/sdr/wiki/rtl-sdr) with antenna (less than 15$) or a [OsmocomBB phone](https://osmocom.org/projects/baseband/wiki/Phones)   or [HackRF](https://greatscottgadgets.com/hackrf/)  
   
   
 Setup
@@ -69,6 +69,31 @@ sudo python find_cell_id.py
 Get immediate assignment :  
 ```
 sudo python immediate_assignment_catcher.py
+```
+
+Find frequencies (HackRF only)
+------------------------------
+
+Setup  
+```
+sudo apt-get install automake autoconf libhackrf-dev
+git clone https://github.com/scateu/kalibrate-hackrf
+cd kalibrate-hackrf/
+./bootstrap
+./configure
+make
+sudo make install
+```
+Run  
+```
+kal -s GSM900
+```
+```
+kal: Scanning for GSM-900 base stations.
+GSM-900:
+	chan:   14 (937.8MHz + 10.449kHz)	power: 3327428.82
+	chan:   15 (938.0MHz + 4.662kHz)	power: 3190712.41
+...
 ```
   
 Links
