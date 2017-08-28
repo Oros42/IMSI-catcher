@@ -74,6 +74,10 @@ cell=""
 country=""
 brand=""
 operator=""
+imsi_to_track=""
+imsi_to_track_len=0
+show_all_tmsi = False
+mcc_codes = None
 
 # return something like '0xd9605460'
 def str_tmsi(tmsi):
@@ -128,6 +132,12 @@ def str_imsi(imsi, p=""):
 		m=""
 		print("Error", p, new_imsi, country, brand, operator)
 	return m
+
+def load_mcc_codes():
+	global mcc_codes
+	# mcc codes form https://en.wikipedia.org/wiki/Mobile_Network_Code
+	with open('mcc-mnc/mcc_codes.json', 'r') as file:
+		mcc_codes = json.load(file)
 
 # print "Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"
 def show_imsi(imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
@@ -429,10 +439,7 @@ if __name__ == '__main__':
 			print("12345")
 			print("123")
 			exit(1)
-
-	# mcc codes form https://en.wikipedia.org/wiki/Mobile_Network_Code
-	with open('mcc-mnc/mcc_codes.json', 'r') as file:
-		mcc_codes = json.load(file)
+	load_mcc_codes()
 
 	print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:5s} ; {:4s} ; {:5s} ; {:6s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"))
 	sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi, store=0)
