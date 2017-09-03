@@ -193,7 +193,7 @@ class tracker:
         def register_imsi(self, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
                 do_print=False
                 n=''
-                if imsi1 and (not imsi_to_track or imsi1[:imsi_to_track_len] == imsi_to_track):
+                if imsi1 and (not self.imsi_to_track or imsi1[:self.imsi_to_track_len] == self.imsi_to_track):
                         if imsi1 not in self.imsis:
                                 # new IMSI
                                 do_print=True
@@ -209,7 +209,7 @@ class tracker:
                                 do_print=True
                                 self.tmsis[tmsi2]=imsi1		
 
-                if imsi2 and (not imsi_to_track or imsi2[:imsi_to_track_len] == imsi_to_track):
+                if imsi2 and (not self.imsi_to_track or imsi2[:self.imsi_to_track_len] == self.imsi_to_track):
                         if imsi2 not in self.imsis:
                                 # new IMSI
                                 do_print=True
