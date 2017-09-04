@@ -60,7 +60,8 @@ IMSI : https://fr.wikipedia.org/wiki/IMSI
 Realtek RTL2832U : http://doc.ubuntu-fr.org/rtl2832u and http://doc.ubuntu-fr.org/rtl-sdr
 """
 
-from scapy.all import sniff
+import ctypes
+from scapy.all import sniff, UDP
 import json
 from optparse import OptionParser
 
@@ -250,9 +251,33 @@ class tracker:
                         if do_print:
                                 self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), None, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
 
+class gsmtap_hdr(ctypes.BigEndianStructure):
+    _pack_ = 1
+    # Based on gsmtap_hdr structure in <grgsm/gsmtap.h> from gr-gsm
+    _fields_ = [
+        ("version", ctypes.c_ubyte),
+        ("hdr_len", ctypes.c_ubyte),
+        ("type", ctypes.c_ubyte),
+        ("timeslot", ctypes.c_ubyte),
+        ("arfcn", ctypes.c_uint16),
+        ("signal_dbm", ctypes.c_ubyte),
+        ("snr_db", ctypes.c_ubyte),
+        ("frame_number", ctypes.c_uint32),
+        ("sub_type", ctypes.c_ubyte),
+        ("antenna_nr", ctypes.c_ubyte),
+        ("sub_slot", ctypes.c_ubyte),
+        ("res", ctypes.c_ubyte),
+    ]
+    def __repr__(self):
+        return "%s(version=%d, hdr_len=%d, type=%d, timeslot=%d, arfcn=%d, signal_dbm=%d, snr_db=%d, frame_number=%d, sub_type=%d, antenna_nr=%d, sub_slot=%d, res=%d)" % (
+            self.__class__, self.version, self.hdr_len, self.type,
+            self.timeslot, self.arfcn, self.signal_dbm, self.snr_db,
+            self.frame_number, self.sub_type, self.antenna_nr, self.sub_slot,
+            self.res,
+        )
 
 # return mcc mnc, lac, cell, country, brand, operator
-def find_cell(x, t = None):
+def find_cell(gsm, x, t = None):
 	# find_cell() update all following variables
 	global mcc
 	global mnc
@@ -291,8 +316,8 @@ def find_cell(x, t = None):
 	0030                                                02 
 	0040   f8 02 01 9c
 	"""
-	p=str(x)
-	if ord(p[0x36]) == 0x01: # Channel Type: BCCH (1)
+	if gsm.sub_type == 0x01: # Channel Type == BCCH (0)
+		p=str(x)
 		if ord(p[0x3c]) == 0x1b: # Message Type: System Information Type 3
 			# FIXME
 			m=hex(ord(p[0x3f]))
@@ -316,13 +341,20 @@ def find_cell(x, t = None):
 def find_imsi(x, t=None):
 	if t is None:
 		t = imsitracker
-	# Update global cell info if found in package
-	# FIXME : when you change the frequency, this informations is
-	# not immediately updated.  So you could have wrong values when
-	# printing IMSI :-/
-	find_cell(x, t=t)
-	p=str(x)
-	if ord(p[0x36]) != 0x1: # Channel Type != BCCH (0)
+
+	# Create object representing gsmtap header in UDP payload
+	udpdata = str(x[UDP].payload)
+	gsm = gsmtap_hdr.from_buffer_copy(udpdata)
+	#print gsm
+
+	if gsm.sub_type == 0x1: # Channel Type == BCCH (0)
+		# Update global cell info if found in package
+		# FIXME : when you change the frequency, this informations is
+		# not immediately updated.  So you could have wrong values when
+		# printing IMSI :-/
+		find_cell(gsm, x, t=t)
+	else: # Channel Type != BCCH (0)
+		p=str(x)
 		tmsi1=""
 		tmsi2=""
 		imsi1=""
