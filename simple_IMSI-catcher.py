@@ -64,6 +64,7 @@ import ctypes
 from scapy.all import sniff, UDP
 import json
 from optparse import OptionParser
+import socket
 
 imsitracker = None
 
@@ -277,7 +278,7 @@ class gsmtap_hdr(ctypes.BigEndianStructure):
         )
 
 # return mcc mnc, lac, cell, country, brand, operator
-def find_cell(gsm, x, t = None):
+def find_cell(gsm, udpdata, t = None):
 	# find_cell() update all following variables
 	global mcc
 	global mnc
@@ -317,33 +318,32 @@ def find_cell(gsm, x, t = None):
 	0040   f8 02 01 9c
 	"""
 	if gsm.sub_type == 0x01: # Channel Type == BCCH (0)
-		p=str(x)
-		if ord(p[0x3c]) == 0x1b: # Message Type: System Information Type 3
+		p=udpdata
+		if ord(p[0x12]) == 0x1b: # Message Type: System Information Type 3
 			# FIXME
-			m=hex(ord(p[0x3f]))
+			m=hex(ord(p[0x15]))
 			if len(m)<4:
 				mcc=m[2]+'0'
 			else:
 				mcc=m[3]+m[2]
-			mcc+=str(ord(p[0x40]) & 0x0f)
+			mcc+=str(ord(p[0x16]) & 0x0f)
 
 			# FIXME not works with mnc like 005 or 490
-			m=hex(ord(p[0x41]))
+			m=hex(ord(p[0x17]))
 			if len(m)<4:
 				mnc=m[2]+'0'
 			else:
 				mnc=m[3]+m[2]
 
-			lac=ord(p[0x42])*256+ord(p[0x43])
-			cell=ord(p[0x3d])*256+ord(p[0x3e])
-                        t.current_cell(mcc, mnc, lac, cell)
+			lac=ord(p[0x18])*256+ord(p[0x19])
+			cell=ord(p[0x13])*256+ord(p[0x14])
+			t.current_cell(mcc, mnc, lac, cell)
 
-def find_imsi(x, t=None):
+def find_imsi(udpdata, t=None):
 	if t is None:
 		t = imsitracker
 
 	# Create object representing gsmtap header in UDP payload
-	udpdata = str(x[UDP].payload)
 	gsm = gsmtap_hdr.from_buffer_copy(udpdata)
 	#print gsm
 
@@ -352,15 +352,15 @@ def find_imsi(x, t=None):
 		# FIXME : when you change the frequency, this informations is
 		# not immediately updated.  So you could have wrong values when
 		# printing IMSI :-/
-		find_cell(gsm, x, t=t)
+		find_cell(gsm, udpdata, t=t)
 	else: # Channel Type != BCCH (0)
-		p=str(x)
+		p=udpdata
 		tmsi1=""
 		tmsi2=""
 		imsi1=""
 		imsi2=""
-		if ord(p[0x3c]) == 0x21: # Message Type: Paging Request Type 1
-			if ord(p[0x3e]) == 0x08 and (ord(p[0x3f]) & 0x1) == 0x1: # Channel 1: TCH/F (Full rate) (2)
+		if ord(p[0x12]) == 0x21: # Message Type: Paging Request Type 1
+			if ord(p[0x14]) == 0x08 and (ord(p[0x15]) & 0x1) == 0x1: # Channel 1: TCH/F (Full rate) (2)
 				# Mobile Identity 1 Type: IMSI (1)
 				"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -372,9 +372,9 @@ def find_imsi(x, t=None):
 				0050   2b
 				XX XX XX XX XX XX XX XX = IMSI
 				"""
-				imsi1=p[0x3f:][:8]
-				# ord(p[0x3a]) == 0x59 = l2 pseudo length value: 22
-				if ord(p[0x3a]) == 0x59 and ord(p[0x48]) == 0x08 and (ord(p[0x49]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
+				imsi1=p[0x15:][:8]
+				# ord(p[0x10]) == 0x59 = l2 pseudo length value: 22
+				if ord(p[0x10]) == 0x59 and ord(p[0x1E]) == 0x08 and (ord(p[0x1F]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
 					# Mobile Identity 2 Type: IMSI (1)
 					"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -387,8 +387,8 @@ def find_imsi(x, t=None):
 				YY YY YY YY YY YY YY YY = IMSI 1
 				XX XX XX XX XX XX XX XX = IMSI 2
 					"""
-					imsi2=p[0x49:][:8]
-				elif ord(p[0x3a]) == 0x59 and ord(p[0x48]) == 0x08 and (ord(p[0x49]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
+					imsi2=p[0x1F:][:8]
+				elif ord(p[0x10]) == 0x59 and ord(p[0x1E]) == 0x08 and (ord(p[0x1F]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
 					# Mobile Identity - Mobile Identity 2 - IMSI
 					"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -401,11 +401,11 @@ def find_imsi(x, t=None):
 				YY YY YY YY YY YY YY YY = IMSI 1
 				XX XX XX XX = TMSI
 					"""
-					tmsi1=p[0x4a:][:4]
+					tmsi1=p[0x20:][:4]
 
 				t.register_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
 
-			elif ord(p[0x45]) == 0x08 and (ord(p[0x46]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
+			elif ord(p[0x1B]) == 0x08 and (ord(p[0x1C]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
 				# Mobile Identity 2 Type: IMSI (1)
 				"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -418,11 +418,11 @@ def find_imsi(x, t=None):
 				yy yy yy yy = TMSI/P-TMSI - Mobile Identity 1
 				XX XX XX XX XX XX XX XX = IMSI
 				"""
-				tmsi1=p[0x40:][:4]
-				imsi2=p[0x46:][:8]
+				tmsi1=p[0x16:][:4]
+				imsi2=p[0x1C:][:8]
 				t.register_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
 
-			elif ord(p[0x3e]) == 0x05 and (ord(p[0x3f]) & 0x07) == 4: # Mobile Identity - Mobile Identity 1 - TMSI/P-TMSI 
+			elif ord(p[0x14]) == 0x05 and (ord(p[0x15]) & 0x07) == 4: # Mobile Identity - Mobile Identity 1 - TMSI/P-TMSI 
 				"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
@@ -434,16 +434,16 @@ def find_imsi(x, t=None):
 				XX XX XX XX = TMSI/P-TMSI - Mobile Identity 1
 				YY YY YY YY = TMSI/P-TMSI - Mobile Identity 2
 				"""
-				tmsi1=p[0x40:][:4]
-				if ord(p[0x45]) == 0x05 and (ord(p[0x46]) & 0x07) == 4: # Mobile Identity - Mobile Identity 2 - TMSI/P-TMSI 
-					tmsi2=p[0x47:][:4]
+				tmsi1=p[0x16:][:4]
+				if ord(p[0x1B]) == 0x05 and (ord(p[0x1C]) & 0x07) == 4: # Mobile Identity - Mobile Identity 2 - TMSI/P-TMSI 
+					tmsi2=p[0x1D:][:4]
 				else:
 					tmsi2=""
 
 				t.register_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
 
-		elif ord(p[0x3c]) == 0x22: # Message Type: Paging Request Type 2
-			if ord(p[0x47]) == 0x08 and (ord(p[0x48]) & 0x1) == 0x1: # Mobile Identity 3 Type: IMSI (1)
+		elif ord(p[0x12]) == 0x22: # Message Type: Paging Request Type 2
+			if ord(p[0x1D]) == 0x08 and (ord(p[0x1E]) & 0x1) == 0x1: # Mobile Identity 3 Type: IMSI (1)
 				"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f				
 				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
@@ -456,11 +456,23 @@ def find_imsi(x, t=None):
 				zz zz zz zz = TMSI/P-TMSI - Mobile Identity 2
 				XX XX XX XX XX XX XX XX = IMSI
 				"""
-				tmsi1=p[0x3e:][:4]
-				tmsi2=p[0x42:][:4]
-				imsi2=p[0x48:][:8]
+				tmsi1=p[0x14:][:4]
+				tmsi2=p[0x18:][:4]
+				imsi2=p[0x1E:][:8]
 				t.register_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
 
+def udpserver(port, prn):
+	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+	server_address = ('localhost', port)
+	sock.bind(server_address)
+	while True:
+		udpdata, address = sock.recvfrom(4096)
+		if prn:
+			prn(udpdata)
+
+def find_imsi_from_pkg(p):
+	udpdata = str(p[UDP].payload)
+	find_imsi(udpdata)
 
 if __name__ == '__main__':
 	imsitracker = tracker()
@@ -469,6 +481,7 @@ if __name__ == '__main__':
 	parser.add_option("-i", "--iface", dest="iface", default="lo", help="Interface (default : lo)")
 	parser.add_option("-m", "--imsi", dest="imsi", default="", type="string", help='IMSI to track (default : None, Example: 123456789101112 or "123 45 6789101112")')
 	parser.add_option("-p", "--port", dest="port", default="4729", type="int", help="Port (default : 4729)")
+	parser.add_option("-s", "--sniff", action="store_true", dest="sniff", help="sniff on interface instead of listening on port (require root/suid access)")
 	(options, args) = parser.parse_args()
 
 	imsitracker.show_all_tmsi=options.show_all_tmsi
@@ -491,4 +504,7 @@ if __name__ == '__main__':
 			exit(1)
 	imsitracker.track_this_imsi(imsi_to_track)
 	imsitracker.header()
-	sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi, store=0)
+	if options.sniff:
+		sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi_from_pkg, store=0)
+	else:
+		udpserver(port=options.port, prn=find_imsi)
