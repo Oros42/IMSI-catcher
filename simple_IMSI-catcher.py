@@ -64,6 +64,8 @@ import ctypes
 from scapy.all import sniff, UDP
 import json
 from optparse import OptionParser
+import datetime
+import io
 import socket
 
 imsitracker = None
@@ -84,6 +86,7 @@ class tracker:
         
         show_all_tmsi = False
         mcc_codes = None
+        sqlcon = None
 
         def __init__(self):
                 self.load_mcc_codes()
@@ -154,7 +157,7 @@ class tracker:
 
         def load_mcc_codes(self):
                 # mcc codes form https://en.wikipedia.org/wiki/Mobile_Network_Code
-                with open('mcc-mnc/mcc_codes.json', 'r') as file:
+                with io.open('mcc-mnc/mcc_codes.json', 'r', encoding='utf8') as file:
                         self.mcc_codes = json.load(file)
 
         def current_cell(self, mcc, mnc, lac, cell):
@@ -182,11 +185,29 @@ class tracker:
                 self.brand=brand.encode('utf-8')
                 self.operator= operator.encode('utf-8')
 
+ 	def sqlite_file(self, filename):
+		import sqlite3 # Avoid pulling in sqlite3 when not saving
+		print("Saving to SQLite database in %s" % filename)
+		self.sqlcon = sqlite3.connect(filename)
+		# FIXME Figure out proper SQL type for each attribute
+		self.sqlcon.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
+
         def pfields(self, n, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, p=None):
                 if imsi:
                         imsi, imsicountry, imsibrand, imsioperator = self.str_imsi(imsi, p)
                 
                 print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell)))
+		if self.sqlcon:
+			now = datetime.datetime.now()
+			if tmsi1 == "":
+				tmsi1 = None
+			if tmsi2 == "":
+				tmsi2 = None
+			self.sqlcon.execute(u"INSERT INTO observations (stamp, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell) "+
+				       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+				       (now, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator,
+					mcc, mnc, lac, cell))
+			self.sqlcon.commit()
 
         def header(self):
                 print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"))
@@ -482,7 +503,11 @@ if __name__ == '__main__':
 	parser.add_option("-m", "--imsi", dest="imsi", default="", type="string", help='IMSI to track (default : None, Example: 123456789101112 or "123 45 6789101112")')
 	parser.add_option("-p", "--port", dest="port", default="4729", type="int", help="Port (default : 4729)")
 	parser.add_option("-s", "--sniff", action="store_true", dest="sniff", help="sniff on interface instead of listening on port (require root/suid access)")
+	parser.add_option("-w", "--sqlite", dest="sqlite", default="imsi-catcher.sqlite", type="string", help="Save observed IMSI values to specified SQLite file")
 	(options, args) = parser.parse_args()
+
+	if options.sqlite:
+		imsitracker.sqlite_file(options.sqlite)
 
 	imsitracker.show_all_tmsi=options.show_all_tmsi
 	imsi_to_track=""
