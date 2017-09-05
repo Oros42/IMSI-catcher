@@ -1,0 +1,100 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# Author: Petter Reinholdtsen
+# Lisence: GPL v2 or later at your own choice
+
+"""
+Script to scan for base stations and start submitt GSM packages on one
+or more the frequencies found using grgsm_livemon_headless to the
+loopback network device
+
+The idea is to gather GSM packages from as many of the GSM base
+stations and phones in the area as possible, by spreading across as
+many operators as possible.
+"""
+
+import imp
+from optparse import OptionParser
+import subprocess
+import sys
+
+def find_gsm_bases():
+    	scanner = imp.load_source('scanner', '/usr/bin/grgsm_scanner')
+        sys.modules['scanner'] = scanner
+        (options, args) = scanner.argument_parser().parse_args()
+        list = scanner.do_scan(options.samp_rate, options.band, options.speed,
+                               options.ppm, options.gain, options.args)
+        return list
+
+def select_freqs(serverlist, count = 1):
+        """
+Select the requested number of frequencies, spread across as many base
+station operators (mcc+mnc) as possible, pick the ones with the
+strongest signals.
+
+Could consider arfcn, freq, cid, lac, mcc, mnc, ccch_conf, power,
+neighbours, cell_arfcns to get as wide spread as possible, but is
+only using mcc, mnc and power at the moment.
+
+"""
+
+        # Make shallow copy to avoid modifying the list of the caller when
+        # removing elements below.
+        listcopy = []
+        for s in serverlist:
+                listcopy.append(s)
+    
+                freqs = []
+                operatorscount = {}
+        # First, initialize operatorscount[] to zero for all operators
+        for s in listcopy:
+                if not (s.mcc, s.mnc) in operatorscount:
+                        operatorscount[(s.mcc, s.mnc)] = 0
+        # Next, pick the number of unique frequences we want, one a the
+        # time, while trying to get as many operators as we cal.
+        while 0 < count:
+                sorted_list = sorted(listcopy, key=lambda s:
+                                     (operatorscount[(s.mcc,s.mnc)], s.mcc,
+                                      s.mnc, -s.power))
+                s = sorted_list[0]
+                freqs.append(s.freq)
+                operatorscount[(s.mcc, s.mnc)] = operatorscount[(s.mcc, s.mnc)] + 1
+                count = count - 1
+                listcopy.remove(s)
+        return freqs
+
+def argument_parser():
+        parser = OptionParser(usage="%prog: [options]")
+        parser.add_option("-n", "--numrecv", dest="numrecv", type="int",
+                          default=1,
+                          help="Set number of livemon processes to start (use one per receiver) [default=%default]")
+        return parser
+
+def main(options = None):
+        if options is None:
+                (options, args) = argument_parser().parse_args()
+
+        print("Locating potential GSM base station frequencies (this can take a few minutes).")
+        list = find_gsm_bases()
+        print("Found %d frequences" % len(list))
+        numreceivers = options.numrecv
+        freqs = select_freqs(list, numreceivers)
+
+        print("Listening on the frequencies for %d potential GSM base stations." % numreceivers)
+
+        # Make sure a user process can listen on port 4729 by asking
+        # livemon processes to listen on other ports.
+        serverport = 4730
+        procs = []
+        for freq in freqs:
+                print("Starting livemon for freqency %.0f, server on port %d" % (freq, serverport))
+                proc = subprocess.Popen(["grgsm_livemon_headless",
+                                         "--serverport=%d" % serverport,
+                                         "-f", str(freq)])
+                procs.append(proc)
+                serverport = serverport + 1
+        #proc.terminate()
+
+if __name__ == '__main__':
+        main()
