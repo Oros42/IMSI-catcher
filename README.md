@@ -40,17 +40,39 @@ sudo python simple_IMSI-catcher.py --sniff
 ```  
 You can add -h to display options.  
 
-In terminal 2  
+In terminal 1 (if you have the last version of gr-gsm)
+
 ```
-grgsm_livemon
+python scan-and-livemon
 ```
-Now, change the frequency and stop it when you have output like :  
+
+This step can take a few minutes to get started, as it first run
+grgsm_scanner to find nearby base stations and ask
+grgsm_livemon_headless to receive the signal from the strongest
+signals.
+
+Or first find the frequencies of the nearby base stations.
+
+```
+grgsm_scanner
+```
+
+Next, ask grgsm_livemon to use one of these frequencies:
+
+```
+grgsm_livemon -f 938.2M
+```
+
+It should start producing output like :
 ```
 15 06 21 00 01 f0 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b
 25 06 21 00 05 f4 f8 68 03 26 23 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b
 49 06 1b 95 cc 02 f8 02 01 9c c8 03 1e 57 a5 01 79 00 00 1c 13 2b 2b
 ...
 ```
+
+You can change the frequency if you want.
+
 Now, watch terminal 1 and wait. IMSI numbers should appear :-)  
 If nothing appears after 1 min, change the frequency.  
   
@@ -75,10 +97,12 @@ Get immediate assignment :
 sudo python immediate_assignment_catcher.py
 ```
 
-Find frequencies (HackRF only)
-------------------------------
+Find frequencies
+----------------
 
-Setup  
+You can either use the grgsm_scanner program from gr-gsm mentioned
+above, or fetch the kalibrate-hackrf tool like this:
+
 ```
 sudo apt-get install automake autoconf libhackrf-dev
 git clone https://github.com/scateu/kalibrate-hackrf
