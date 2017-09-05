@@ -30,9 +30,13 @@ Run
 ===
   
 Open 2 terminals.  
-In terminal 1  
+In terminal 1 (if you have the last version of gr-gsm)  
 ```
-sudo python simple_IMSI-catcher.py
+python simple_IMSI-catcher.py
+```  
+Or
+```
+sudo python simple_IMSI-catcher.py --sniff
 ```  
 You can add -h to display options.  
 
