@@ -149,7 +149,7 @@ class tracker:
                                 new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
 
                 try:
-                        return new_imsi, country.encode('utf-8'), brand.encode('utf-8'), operator.encode('utf-8')
+                        return new_imsi, country, brand, operator
                 except:
                         m=""
                         print("Error", p, new_imsi, country, brand, operator)
@@ -163,7 +163,7 @@ class tracker:
         def current_cell(self, mcc, mnc, lac, cell):
                 brand=""
                 operator=""
-                countr = ""
+                country = ""
                 if mcc in self.mcc_codes:
                         if mnc in self.mcc_codes[mcc]['MNC']:
                                 country=self.mcc_codes[mcc]['c'][0]
@@ -181,9 +181,9 @@ class tracker:
                 self.mnc=str(mnc)
                 self.lac=str(lac)
                 self.cell=str(cell)
-                self.country=country.encode('utf-8')
-                self.brand=brand.encode('utf-8')
-                self.operator= operator.encode('utf-8')
+                self.country=country
+                self.brand=brand
+                self.operator=operator
 
  	def sqlite_file(self, filename):
 		import sqlite3 # Avoid pulling in sqlite3 when not saving
@@ -195,9 +195,9 @@ class tracker:
         def pfields(self, n, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, p=None):
                 if imsi:
                         imsi, imsicountry, imsibrand, imsioperator = self.str_imsi(imsi, p)
-                
-                print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell)))
-		if self.sqlcon:
+                print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tms
+i2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell))).encode("utf-8"))
+                if self.sqlcon:
 			now = datetime.datetime.now()
 			if tmsi1 == "":
 				tmsi1 = None
