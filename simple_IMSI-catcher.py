@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Author: Oros
-# Contributors : puyoulu, 1kali2kali
-# 2017/08/01
+# Contributors : puyoulu, 1kali2kali, petterreinholdtsen
+# 2017/09/07
 # License : CC0 1.0 Universal
 
 """
@@ -71,231 +71,231 @@ import socket
 imsitracker = None
 
 class tracker:
-        # phones
-        imsis=[] # [IMSI,...]
-        tmsis={} # {TMSI:IMSI,...}
-        nb_IMSI=0 # count the number of IMSI
+	# phones
+	imsis=[] # [IMSI,...]
+	tmsis={} # {TMSI:IMSI,...}
+	nb_IMSI=0 # count the number of IMSI
 
-        mcc=""
-        mnc=""
-        lac=""
-        cell=""
-        country=""
-        brand=""
-        operator=""
-        
-        show_all_tmsi = False
-        mcc_codes = None
-        sqlcon = None
+	mcc=""
+	mnc=""
+	lac=""
+	cell=""
+	country=""
+	brand=""
+	operator=""
 
-        def __init__(self):
-                self.load_mcc_codes()
-                self.track_this_imsi("")
+	show_all_tmsi = False
+	mcc_codes = None
+	sqlcon = None
 
-        def track_this_imsi(self, imsi_to_track):
-                self.imsi_to_track = imsi_to_track
-                self.imsi_to_track_len=len(imsi_to_track)
+	def __init__(self):
+		self.load_mcc_codes()
+		self.track_this_imsi("")
 
-        # return something like '0xd9605460'
-        def str_tmsi(self, tmsi):
-                if tmsi != "":
-                        new_tmsi="0x"
-                        for a in tmsi:
-                                c=hex(ord(a))
-                                if len(c)==4:
-                                        new_tmsi+=str(c[2])+str(c[3])
-                                else:
-                                        new_tmsi+="0"+str(c[2])
-                        return new_tmsi
-                else:
-                        return ""
+	def track_this_imsi(self, imsi_to_track):
+		self.imsi_to_track = imsi_to_track
+		self.imsi_to_track_len=len(imsi_to_track)
 
-        def decode_imsi(self, imsi):
-                new_imsi=''
-                for a in imsi:
-                        c=hex(ord(a))
-                        if len(c)==4:
-                                new_imsi+=str(c[3])+str(c[2])
-                        else:
-                                new_imsi+=str(c[2])+"0"
+	# return something like '0xd9605460'
+	def str_tmsi(self, tmsi):
+		if tmsi != "":
+			new_tmsi="0x"
+			for a in tmsi:
+				c=hex(ord(a))
+				if len(c)==4:
+					new_tmsi+=str(c[2])+str(c[3])
+				else:
+					new_tmsi+="0"+str(c[2])
+			return new_tmsi
+		else:
+			return ""
 
-                mcc=new_imsi[1:4]
-                mnc=new_imsi[4:6]
-                return new_imsi, mcc, mnc
+	def decode_imsi(self, imsi):
+		new_imsi=''
+		for a in imsi:
+			c=hex(ord(a))
+			if len(c)==4:
+				new_imsi+=str(c[3])+str(c[2])
+			else:
+				new_imsi+=str(c[2])+"0"
 
-        # return something like
-        # '208 20 1752XXXXXX', 'France', 'Bouygues', 'Bouygues Telecom'
-        def str_imsi(self, imsi, p=""):
-                new_imsi, mcc, mnc = self.decode_imsi(imsi)
-                country=""
-                brand=""
-                operator=""
-                if mcc in self.mcc_codes:
-                        if mnc in self.mcc_codes[mcc]['MNC']:
-                                country=self.mcc_codes[mcc]['c'][0]
-                                brand=self.mcc_codes[mcc]['MNC'][mnc][0]
-                                operator=self.mcc_codes[mcc]['MNC'][mnc][1]
-                                new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
-                        elif mnc+new_imsi[6:7] in self.mcc_codes[mcc]['MNC']:
-                                mnc+=new_imsi[6:7]
-                                country=self.mcc_codes[mcc]['c'][0]
-                                brand=self.mcc_codes[mcc]['MNC'][mnc][0]
-                                operator=self.mcc_codes[mcc]['MNC'][mnc][1]
-                                new_imsi=mcc+" "+mnc+" "+new_imsi[7:]
-                        else:
-                                country=self.mcc_codes[mcc]['c'][0]
-                                brand="Unknown MNC {}".format(mnc)
-                                operator="Unknown MNC {}".format(mnc)
-                                new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
+		mcc=new_imsi[1:4]
+		mnc=new_imsi[4:6]
+		return new_imsi, mcc, mnc
 
-                try:
-                        return new_imsi, country, brand, operator
-                except:
-                        m=""
-                        print("Error", p, new_imsi, country, brand, operator)
-                return "", "", "", ""
+	# return something like
+	# '208 20 1752XXXXXX', 'France', 'Bouygues', 'Bouygues Telecom'
+	def str_imsi(self, imsi, p=""):
+		new_imsi, mcc, mnc = self.decode_imsi(imsi)
+		country=""
+		brand=""
+		operator=""
+		if mcc in self.mcc_codes:
+			if mnc in self.mcc_codes[mcc]['MNC']:
+				country=self.mcc_codes[mcc]['c'][0]
+				brand=self.mcc_codes[mcc]['MNC'][mnc][0]
+				operator=self.mcc_codes[mcc]['MNC'][mnc][1]
+				new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
+			elif mnc+new_imsi[6:7] in self.mcc_codes[mcc]['MNC']:
+				mnc+=new_imsi[6:7]
+				country=self.mcc_codes[mcc]['c'][0]
+				brand=self.mcc_codes[mcc]['MNC'][mnc][0]
+				operator=self.mcc_codes[mcc]['MNC'][mnc][1]
+				new_imsi=mcc+" "+mnc+" "+new_imsi[7:]
+			else:
+				country=self.mcc_codes[mcc]['c'][0]
+				brand="Unknown MNC {}".format(mnc)
+				operator="Unknown MNC {}".format(mnc)
+				new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
 
-        def load_mcc_codes(self):
-                # mcc codes form https://en.wikipedia.org/wiki/Mobile_Network_Code
-                with io.open('mcc-mnc/mcc_codes.json', 'r', encoding='utf8') as file:
-                        self.mcc_codes = json.load(file)
+		try:
+			return new_imsi, country, brand, operator
+		except:
+			m=""
+			print("Error", p, new_imsi, country, brand, operator)
+		return "", "", "", ""
 
-        def current_cell(self, mcc, mnc, lac, cell):
-                brand=""
-                operator=""
-                country = ""
-                if mcc in self.mcc_codes:
-                        if mnc in self.mcc_codes[mcc]['MNC']:
-                                country=self.mcc_codes[mcc]['c'][0]
-                                brand=self.mcc_codes[mcc]['MNC'][mnc][0]
-                                operator=self.mcc_codes[mcc]['MNC'][mnc][1]
-                        else:
-                                country=self.mcc_codes[mcc]['c'][0]
-                                brand="Unknown MNC {}".format(mnc)
-                                operator="Unknown MNC {}".format(mnc)
-                else:
-                        country="Unknown MCC {}".format(mcc)
-                        brand="Unknown MNC {}".format(mnc)
-                        operator="Unknown MNC {}".format(mnc)
-                self.mcc=str(mcc)
-                self.mnc=str(mnc)
-                self.lac=str(lac)
-                self.cell=str(cell)
-                self.country=country
-                self.brand=brand
-                self.operator=operator
+	def load_mcc_codes(self):
+		# mcc codes form https://en.wikipedia.org/wiki/Mobile_Network_Code
+		with io.open('mcc-mnc/mcc_codes.json', 'r', encoding='utf8') as file:
+			self.mcc_codes = json.load(file)
 
- 	def sqlite_file(self, filename):
+	def current_cell(self, mcc, mnc, lac, cell):
+		brand=""
+		operator=""
+		country = ""
+		if mcc in self.mcc_codes:
+			if mnc in self.mcc_codes[mcc]['MNC']:
+				country=self.mcc_codes[mcc]['c'][0]
+				brand=self.mcc_codes[mcc]['MNC'][mnc][0]
+				operator=self.mcc_codes[mcc]['MNC'][mnc][1]
+			else:
+				country=self.mcc_codes[mcc]['c'][0]
+				brand="Unknown MNC {}".format(mnc)
+				operator="Unknown MNC {}".format(mnc)
+		else:
+			country="Unknown MCC {}".format(mcc)
+			brand="Unknown MNC {}".format(mnc)
+			operator="Unknown MNC {}".format(mnc)
+		self.mcc=str(mcc)
+		self.mnc=str(mnc)
+		self.lac=str(lac)
+		self.cell=str(cell)
+		self.country=country
+		self.brand=brand
+		self.operator=operator
+
+	def sqlite_file(self, filename):
 		import sqlite3 # Avoid pulling in sqlite3 when not saving
 		print("Saving to SQLite database in %s" % filename)
 		self.sqlcon = sqlite3.connect(filename)
 		# FIXME Figure out proper SQL type for each attribute
 		self.sqlcon.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
 
-        def pfields(self, n, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, p=None):
-                if imsi:
-                        imsi, imsicountry, imsibrand, imsioperator = self.str_imsi(imsi, p)
-                print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell))).encode("utf-8"))
-                if self.sqlcon:
+	def pfields(self, n, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, p=None):
+		if imsi:
+			imsi, imsicountry, imsibrand, imsioperator = self.str_imsi(imsi, p)
+		print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell))).encode("utf-8"))
+		if self.sqlcon:
 			now = datetime.datetime.now()
 			if tmsi1 == "":
 				tmsi1 = None
 			if tmsi2 == "":
 				tmsi2 = None
 			self.sqlcon.execute(u"INSERT INTO observations (stamp, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell) "+
-				       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-				       (now, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator,
+					"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+					(now, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator,
 					mcc, mnc, lac, cell))
 			self.sqlcon.commit()
 
-        def header(self):
-                print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"))
+	def header(self):
+		print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"))
 
-        # print "Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"
-        def register_imsi(self, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
-                do_print=False
-                n=''
-                if imsi1 and (not self.imsi_to_track or imsi1[:self.imsi_to_track_len] == self.imsi_to_track):
-                        if imsi1 not in self.imsis:
-                                # new IMSI
-                                do_print=True
-                                self.imsis.append(imsi1)
-                                self.nb_IMSI+=1
-                                n=self.nb_IMSI
-                        if tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi1):
-                                # new TMSI to an ISMI
-                                do_print=True
-                                self.tmsis[tmsi1]=imsi1
-                        if tmsi2 and (tmsi2 not in self.tmsis or self.tmsis[tmsi2] != imsi1):
-                                # new TMSI to an ISMI
-                                do_print=True
-                                self.tmsis[tmsi2]=imsi1		
+	# print "Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"
+	def register_imsi(self, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
+		do_print=False
+		n=''
+		if imsi1 and (not self.imsi_to_track or imsi1[:self.imsi_to_track_len] == self.imsi_to_track):
+			if imsi1 not in self.imsis:
+				# new IMSI
+				do_print=True
+				self.imsis.append(imsi1)
+				self.nb_IMSI+=1
+				n=self.nb_IMSI
+			if tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi1):
+				# new TMSI to an ISMI
+				do_print=True
+				self.tmsis[tmsi1]=imsi1
+			if tmsi2 and (tmsi2 not in self.tmsis or self.tmsis[tmsi2] != imsi1):
+				# new TMSI to an ISMI
+				do_print=True
+				self.tmsis[tmsi2]=imsi1		
 
-                if imsi2 and (not self.imsi_to_track or imsi2[:self.imsi_to_track_len] == self.imsi_to_track):
-                        if imsi2 not in self.imsis:
-                                # new IMSI
-                                do_print=True
-                                self.imsis.append(imsi2)
-                                self.nb_IMSI+=1
-                                n=self.nb_IMSI
-                        if tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi2):
-                                # new TMSI to an ISMI
-                                do_print=True
-                                self.tmsis[tmsi1]=imsi2
-                        if tmsi2 and (tmsi2 not in self.tmsis or self.tmsis[tmsi2] != imsi2):
-                                # new TMSI to an ISMI
-                                do_print=True
-                                self.tmsis[tmsi2]=imsi2
+		if imsi2 and (not self.imsi_to_track or imsi2[:self.imsi_to_track_len] == self.imsi_to_track):
+			if imsi2 not in self.imsis:
+				# new IMSI
+				do_print=True
+				self.imsis.append(imsi2)
+				self.nb_IMSI+=1
+				n=self.nb_IMSI
+			if tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi2):
+				# new TMSI to an ISMI
+				do_print=True
+				self.tmsis[tmsi1]=imsi2
+			if tmsi2 and (tmsi2 not in self.tmsis or self.tmsis[tmsi2] != imsi2):
+				# new TMSI to an ISMI
+				do_print=True
+				self.tmsis[tmsi2]=imsi2
 
-                if not imsi1 and not imsi2 and tmsi1 and tmsi2:
-                        if tmsi2 in self.tmsis:
-                                # switch the TMSI
-                                do_print=True
-                                imsi1=self.tmsis[tmsi2]
-                                self.tmsis[tmsi1]=imsi1
-                                del self.tmsis[tmsi2]
+		if not imsi1 and not imsi2 and tmsi1 and tmsi2:
+			if tmsi2 in self.tmsis:
+				# switch the TMSI
+				do_print=True
+				imsi1=self.tmsis[tmsi2]
+				self.tmsis[tmsi1]=imsi1
+				del self.tmsis[tmsi2]
 
-                if do_print:
-                        if imsi1:
-                                self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), imsi1, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
-                        if imsi2:
-                                self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), imsi2, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+		if do_print:
+			if imsi1:
+				self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), imsi1, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+			if imsi2:
+				self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), imsi2, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
 
-                if not imsi1 and not imsi2 and self.show_all_tmsi:
-                        do_print=False
-                        if tmsi1 and tmsi1 not in self.tmsis:
-                                do_print=True
-                                self.tmsis[tmsi1]=""
-                        if tmsi1 and tmsi1 not in self.tmsis:
-                                do_print=True
-                                self.tmsis[tmsi2]=""
-                        if do_print:
-                                self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), None, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+		if not imsi1 and not imsi2 and self.show_all_tmsi:
+			do_print=False
+			if tmsi1 and tmsi1 not in self.tmsis:
+				do_print=True
+				self.tmsis[tmsi1]=""
+			if tmsi1 and tmsi1 not in self.tmsis:
+				do_print=True
+				self.tmsis[tmsi2]=""
+			if do_print:
+				self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), None, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
 
 class gsmtap_hdr(ctypes.BigEndianStructure):
-    _pack_ = 1
-    # Based on gsmtap_hdr structure in <grgsm/gsmtap.h> from gr-gsm
-    _fields_ = [
-        ("version", ctypes.c_ubyte),
-        ("hdr_len", ctypes.c_ubyte),
-        ("type", ctypes.c_ubyte),
-        ("timeslot", ctypes.c_ubyte),
-        ("arfcn", ctypes.c_uint16),
-        ("signal_dbm", ctypes.c_ubyte),
-        ("snr_db", ctypes.c_ubyte),
-        ("frame_number", ctypes.c_uint32),
-        ("sub_type", ctypes.c_ubyte),
-        ("antenna_nr", ctypes.c_ubyte),
-        ("sub_slot", ctypes.c_ubyte),
-        ("res", ctypes.c_ubyte),
-    ]
-    def __repr__(self):
-        return "%s(version=%d, hdr_len=%d, type=%d, timeslot=%d, arfcn=%d, signal_dbm=%d, snr_db=%d, frame_number=%d, sub_type=%d, antenna_nr=%d, sub_slot=%d, res=%d)" % (
-            self.__class__, self.version, self.hdr_len, self.type,
-            self.timeslot, self.arfcn, self.signal_dbm, self.snr_db,
-            self.frame_number, self.sub_type, self.antenna_nr, self.sub_slot,
-            self.res,
-        )
+	_pack_ = 1
+	# Based on gsmtap_hdr structure in <grgsm/gsmtap.h> from gr-gsm
+	_fields_ = [
+		("version", ctypes.c_ubyte),
+		("hdr_len", ctypes.c_ubyte),
+		("type", ctypes.c_ubyte),
+		("timeslot", ctypes.c_ubyte),
+		("arfcn", ctypes.c_uint16),
+		("signal_dbm", ctypes.c_ubyte),
+		("snr_db", ctypes.c_ubyte),
+		("frame_number", ctypes.c_uint32),
+		("sub_type", ctypes.c_ubyte),
+		("antenna_nr", ctypes.c_ubyte),
+		("sub_slot", ctypes.c_ubyte),
+		("res", ctypes.c_ubyte),
+		]
+	def __repr__(self):
+		return "%s(version=%d, hdr_len=%d, type=%d, timeslot=%d, arfcn=%d, signal_dbm=%d, snr_db=%d, frame_number=%d, sub_type=%d, antenna_nr=%d, sub_slot=%d, res=%d)" % (
+			self.__class__, self.version, self.hdr_len, self.type,
+			self.timeslot, self.arfcn, self.signal_dbm, self.snr_db,
+			self.frame_number, self.sub_type, self.antenna_nr, self.sub_slot,
+			self.res,
+		)
 
 # return mcc mnc, lac, cell, country, brand, operator
 def find_cell(gsm, udpdata, t = None):
