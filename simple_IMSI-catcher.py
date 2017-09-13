@@ -61,7 +61,6 @@ Realtek RTL2832U : http://doc.ubuntu-fr.org/rtl2832u and http://doc.ubuntu-fr.or
 """
 
 import ctypes
-from scapy.all import sniff, UDP
 import json
 from optparse import OptionParser
 import datetime
@@ -529,6 +528,7 @@ if __name__ == '__main__':
 	imsitracker.track_this_imsi(imsi_to_track)
 	imsitracker.header()
 	if options.sniff:
+		from scapy.all import sniff, UDP
 		sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi_from_pkg, store=0)
 	else:
 		udpserver(port=options.port, prn=find_imsi)
