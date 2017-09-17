@@ -70,6 +70,7 @@ import socket
 imsitracker = None
 
 class tracker:
+	imsistate = {}
 	# phones
 	imsis=[] # [IMSI,...]
 	tmsis={} # {TMSI:IMSI,...}
@@ -214,6 +215,8 @@ class tracker:
 	def register_imsi(self, arfcn, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
 		do_print=False
 		n=''
+		if imsi1: self.imsi_seen(imsi1, arfcn)
+		if imsi2: self.imsi_seen(imsi2, arfcn)
 		if imsi1 and (not self.imsi_to_track or imsi1[:self.imsi_to_track_len] == self.imsi_to_track):
 			if imsi1 not in self.imsis:
 				# new IMSI
@@ -260,16 +263,42 @@ class tracker:
 			if imsi2:
 				self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), imsi2, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
 
-		if not imsi1 and not imsi2 and self.show_all_tmsi:
-			do_print=False
-			if tmsi1 and tmsi1 not in self.tmsis:
-				do_print=True
-				self.tmsis[tmsi1]=""
-			if tmsi1 and tmsi1 not in self.tmsis:
-				do_print=True
-				self.tmsis[tmsi2]=""
-			if do_print:
-				self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), None, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+		if not imsi1 and not imsi2:
+			# Register IMSI as seen if a TMSI believed to
+			# belong to the IMSI is seen.
+			if tmsi1 and tmsi1 in self.tmsis \
+			   and ""!= self.tmsis[tmsi1]:
+				self.imsi_seen(self.tmsis[tmsi1], arfcn)
+			if self.show_all_tmsi:
+				do_print=False
+				if tmsi1 and tmsi1 not in self.tmsis:
+					do_print=True
+					self.tmsis[tmsi1]=""
+				if tmsi1 and tmsi1 not in self.tmsis:
+					do_print=True
+					self.tmsis[tmsi2]=""
+				if do_print:
+					self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), None, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+	def imsi_seen(self, imsi, arfcn):
+		now = datetime.datetime.utcnow().replace(microsecond=0)
+		imsi, mcc, mnc = self.decode_imsi(imsi)
+		if imsi in self.imsistate:
+			self.imsistate[imsi]["lastseen"] = now
+		else:
+			self.imsistate[imsi] = {
+				"firstseen" : now,
+				"lastseen" : now,
+				"imsi" : imsi,
+				"arfcn" : arfcn,
+			}
+		self.imsi_purge_old()
+	def imsi_purge_old(self):
+		now = datetime.datetime.utcnow().replace(microsecond=0)
+		maxage = datetime.timedelta(minutes=10)
+		limit = now - maxage
+		for imsi in self.imsistate.keys():
+			if limit > self.imsistate[imsi]["lastseen"]:
+				del self.imsistate[imsi]
 
 class gsmtap_hdr(ctypes.BigEndianStructure):
 	_pack_ = 1
