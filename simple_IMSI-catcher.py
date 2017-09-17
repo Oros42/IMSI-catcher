@@ -211,7 +211,7 @@ class tracker:
 		print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"))
 
 	# print "Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"
-	def register_imsi(self, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
+	def register_imsi(self, arfcn, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
 		do_print=False
 		n=''
 		if imsi1 and (not self.imsi_to_track or imsi1[:self.imsi_to_track_len] == self.imsi_to_track):
@@ -422,7 +422,7 @@ def find_imsi(udpdata, t=None):
 					"""
 					tmsi1=p[0x20:][:4]
 
-				t.register_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
+				t.register_imsi(gsm.arfcn, imsi1, imsi2, tmsi1, tmsi2, p)
 
 			elif ord(p[0x1B]) == 0x08 and (ord(p[0x1C]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
 				# Mobile Identity 2 Type: IMSI (1)
@@ -439,7 +439,7 @@ def find_imsi(udpdata, t=None):
 				"""
 				tmsi1=p[0x16:][:4]
 				imsi2=p[0x1C:][:8]
-				t.register_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
+				t.register_imsi(gsm.arfcn, imsi1, imsi2, tmsi1, tmsi2, p)
 
 			elif ord(p[0x14]) == 0x05 and (ord(p[0x15]) & 0x07) == 4: # Mobile Identity - Mobile Identity 1 - TMSI/P-TMSI 
 				"""
@@ -459,7 +459,7 @@ def find_imsi(udpdata, t=None):
 				else:
 					tmsi2=""
 
-				t.register_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
+				t.register_imsi(gsm.arfcn, imsi1, imsi2, tmsi1, tmsi2, p)
 
 		elif ord(p[0x12]) == 0x22: # Message Type: Paging Request Type 2
 			if ord(p[0x1D]) == 0x08 and (ord(p[0x1E]) & 0x1) == 0x1: # Mobile Identity 3 Type: IMSI (1)
@@ -478,7 +478,7 @@ def find_imsi(udpdata, t=None):
 				tmsi1=p[0x14:][:4]
 				tmsi2=p[0x18:][:4]
 				imsi2=p[0x1E:][:8]
-				t.register_imsi(imsi1, imsi2, tmsi1, tmsi2, p)
+				t.register_imsi(gsm.arfcn, imsi1, imsi2, tmsi1, tmsi2, p)
 
 def udpserver(port, prn):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
