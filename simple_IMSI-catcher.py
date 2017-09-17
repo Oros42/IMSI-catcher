@@ -501,7 +501,7 @@ if __name__ == '__main__':
 	parser.add_option("-m", "--imsi", dest="imsi", default="", type="string", help='IMSI to track (default : None, Example: 123456789101112 or "123 45 6789101112")')
 	parser.add_option("-p", "--port", dest="port", default="4729", type="int", help="Port (default : 4729)")
 	parser.add_option("-s", "--sniff", action="store_true", dest="sniff", help="sniff on interface instead of listening on port (require root/suid access)")
-	parser.add_option("-w", "--sqlite", dest="sqlite", default="imsi-catcher.sqlite", type="string", help="Save observed IMSI values to specified SQLite file")
+	parser.add_option("-w", "--sqlite", dest="sqlite", default=None, type="string", help="Save observed IMSI values to specified SQLite file")
 	(options, args) = parser.parse_args()
 
 	if options.sqlite:
