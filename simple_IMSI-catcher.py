@@ -193,8 +193,13 @@ class tracker:
 		self.sqlcon.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
 
 	def pfields(self, n, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, p=None):
+		imsicountry=""
+		imsibrand=""
+		imsioperator=""
 		if imsi:
 			imsi, imsicountry, imsibrand, imsioperator = self.str_imsi(imsi, p)
+		else:
+			imsi=""
 		print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell))).encode("utf-8"))
 		if self.sqlcon:
 			now = datetime.datetime.now()
