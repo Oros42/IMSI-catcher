@@ -560,9 +560,10 @@ if __name__ == '__main__':
 			print("123")
 			exit(1)
 	imsitracker.track_this_imsi(imsi_to_track)
-	imsitracker.header()
 	if options.sniff:
 		from scapy.all import sniff, UDP
+		imsitracker.header()
 		sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi_from_pkg, store=0)
 	else:
+		imsitracker.header()
 		udpserver(port=options.port, prn=find_imsi)
