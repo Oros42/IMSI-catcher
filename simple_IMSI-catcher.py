@@ -88,9 +88,17 @@ class tracker:
 	mcc_codes = None
 	sqlcon = None
 
+	ouput_function=None
+
 	def __init__(self):
 		self.load_mcc_codes()
 		self.track_this_imsi("")
+		self.ouput_function=self.ouput
+
+	def set_ouput_function(self, new_ouput_function):
+		# New ouput function need this field :
+		# cpt, tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, mcc, mnc, lac, cell, packet=None
+		self.ouput_function=new_ouput_function
 
 	def track_this_imsi(self, imsi_to_track):
 		self.imsi_to_track = imsi_to_track
@@ -125,7 +133,7 @@ class tracker:
 
 	# return something like
 	# '208 20 1752XXXXXX', 'France', 'Bouygues', 'Bouygues Telecom'
-	def str_imsi(self, imsi, p=""):
+	def str_imsi(self, imsi, packet=""):
 		new_imsi, mcc, mnc = self.decode_imsi(imsi)
 		country=""
 		brand=""
@@ -152,7 +160,7 @@ class tracker:
 			return new_imsi, country, brand, operator
 		except:
 			m=""
-			print("Error", p, new_imsi, country, brand, operator)
+			print("Error", packet, new_imsi, country, brand, operator)
 		return "", "", "", ""
 
 	def load_mcc_codes(self):
@@ -192,15 +200,18 @@ class tracker:
 		# FIXME Figure out proper SQL type for each attribute
 		self.sqlcon.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
 
-	def pfields(self, n, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, p=None):
+	def ouput(cpt, tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, mcc, mnc, lac, cell, packet=None):
+		print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell))).encode("utf-8"))
+
+	def pfields(self, cpt, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, packet=None):
 		imsicountry=""
 		imsibrand=""
 		imsioperator=""
 		if imsi:
-			imsi, imsicountry, imsibrand, imsioperator = self.str_imsi(imsi, p)
+			imsi, imsicountry, imsibrand, imsioperator = self.str_imsi(imsi, packet)
 		else:
 			imsi=""
-		print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell))).encode("utf-8"))
+		self.ouput_function(cpt, tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, mcc, mnc, lac, cell, packet)
 		if self.sqlcon:
 			now = datetime.datetime.now()
 			if tmsi1 == "":
