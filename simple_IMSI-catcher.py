@@ -200,8 +200,8 @@ class tracker:
 		# FIXME Figure out proper SQL type for each attribute
 		self.sqlcon.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
 
-	def ouput(cpt, tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, mcc, mnc, lac, cell, packet=None):
-		print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(n), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell))).encode("utf-8"))
+	def ouput(self, cpt, tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, mcc, mnc, lac, cell, packet=None):
+		print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s}".format(str(cpt), tmsi1, tmsi2, imsi, imsibrand, imsicountry, imsioperator, str(mcc), str(mnc), str(lac), str(cell))).encode("utf-8"))
 
 	def pfields(self, cpt, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, packet=None):
 		imsicountry=""
