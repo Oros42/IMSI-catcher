@@ -556,9 +556,11 @@ if __name__ == '__main__':
 	imsi_to_track=""
 	if options.imsi:
 		imsi="9"+options.imsi.replace(" ", "")
+		imsi_to_track_len=len(imsi)
 		if imsi_to_track_len%2 == 0 and imsi_to_track_len > 0 and imsi_to_track_len <17:
 			for i in range(0, imsi_to_track_len-1, 2):
 				imsi_to_track+=chr(int(imsi[i+1])*16+int(imsi[i]))
+			imsi_to_track_len=len(imsi_to_track)
 		else:
 			print("Wrong size for the IMSI to track!")
 			print("Valid sizes :")
