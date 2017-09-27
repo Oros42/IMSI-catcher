@@ -93,7 +93,9 @@ def main(options = None):
 			"-f", str(freq)])
 		procs.append(proc)
 		serverport = serverport + 1
-	#proc.terminate()
+	# Keep the processes in our process group, to make sure they all die when scan-and-livemon is killed
+	for proc in procs:
+		proc.wait()
 
 if __name__ == '__main__':
 	main()
