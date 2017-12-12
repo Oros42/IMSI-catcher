@@ -29,18 +29,50 @@ If gr-gsm failled to setup. Try this setup : https://github.com/ptrkrysik/gr-gsm
 Run
 ===
   
+With an old version of gr-gsm
+-----------------------------
+  
 Open 2 terminals.  
-In terminal 1 (if you have the last version of gr-gsm)  
-```
-python simple_IMSI-catcher.py
-```  
-Or
+In terminal 1
 ```
 sudo python simple_IMSI-catcher.py --sniff
 ```  
 You can add -h to display options.  
+  
+In terminal 2, search a frequency to listen :
+```
+grgsm_scanner
+```
 
-In terminal 1 (if you have the last version of gr-gsm)
+Next, ask grgsm_livemon to use one of these frequencies:
+
+```
+grgsm_livemon -f 938.2M
+```
+
+It should start producing output like :
+```
+15 06 21 00 01 f0 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b
+25 06 21 00 05 f4 f8 68 03 26 23 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b 2b
+49 06 1b 95 cc 02 f8 02 01 9c c8 03 1e 57 a5 01 79 00 00 1c 13 2b 2b
+...
+```
+You can change the frequency if you want.
+
+
+
+With version of gr-gsm >= 0.41.2-1
+----------------------------------
+
+Open 2 terminals.  
+In terminal 1
+```
+python simple_IMSI-catcher.py
+```  
+You can add -h to display options.  
+
+
+In terminal 2
 
 ```
 python scan-and-livemon
@@ -72,6 +104,9 @@ It should start producing output like :
 ```
 
 You can change the frequency if you want.
+
+For all
+-------
 
 Now, watch terminal 1 and wait. IMSI numbers should appear :-)  
 If nothing appears after 1 min, change the frequency.  
