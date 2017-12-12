@@ -45,7 +45,10 @@ grgsm_scanner
 ```
 
 Next, ask grgsm_livemon to use one of these frequencies:
-
+```
+grgsm_livemon -f <your_frequency>M
+```
+Example :  
 ```
 grgsm_livemon -f 938.2M
 ```
@@ -91,6 +94,10 @@ grgsm_scanner
 
 Next, ask grgsm_livemon to use one of these frequencies:
 
+```
+grgsm_livemon -f <your_frequency>M
+```
+Example :  
 ```
 grgsm_livemon -f 938.2M
 ```
