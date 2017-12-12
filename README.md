@@ -23,8 +23,8 @@ sudo add-apt-repository -y ppa:ptrkrysik/gr-gsm
 sudo apt update
 sudo apt install gr-gsm
 ```
-If gr-gsm failled to setup. Try this setup : https://github.com/ptrkrysik/gr-gsm/wiki/Installation
-Debian : https://tracker.debian.org/pkg/gr-gsm
+If gr-gsm failled to setup. Try this setup : https://github.com/ptrkrysik/gr-gsm/wiki/Installation  
+Debian : https://tracker.debian.org/pkg/gr-gsm  
 
 Run
 ===
