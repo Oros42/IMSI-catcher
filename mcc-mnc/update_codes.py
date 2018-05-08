@@ -46,12 +46,12 @@ for t in soup.find_all("table", class_="wikitable"):
 	try:
 		if not 'MCC' in t.text:
 			continue
-		h3=t.find_previous_sibling("h3")
-		if not h3 or ' - ' not in h3.text or '[edit]' not in h3.text:
+		h4=t.find_previous_sibling("h4")
+		if not h4 or ' - ' not in h4.text or '[edit]' not in h4.text:
 			continue
-		h3=h3.text.split(' - ')
-		country_name=h3[0]
-		country_code=h3[1][:-6] # rm '[edit]'
+		h4=h4.text.split(' - ')
+		country_name=h4[0]
+		country_code=h4[1][:-6] # rm '[edit]'
 
 		for tr in t.find_all('tr'):
 			td=tr.find_all('td')
