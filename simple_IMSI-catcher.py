@@ -355,6 +355,9 @@ def find_cell(gsm, udpdata, t = None):
 	"""
 	Dump of a packet from wireshark
 
+	/!\ there are an offset of 0x2a
+	0x12 (from the code) + 0x2a (offset) == 0x3c (in documentation's dump)
+
 	        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 	0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
 	0010   00 43 9a 6b 40 00 40 11 a2 3c 7f 00 00 01 7f 00
@@ -366,14 +369,22 @@ def find_cell(gsm, udpdata, t = None):
 	Channel Type: BCCH (1)
 	                          6
 	0030                     01
+	
+	0x36 - 0x2a = position p[0x0c]
+
 
 	Message Type: System Information Type 3
 	                                            c
 	0030                                       1b
 
+	0x3c - 0x2a = position p[0x12]
+
 	Cell CI: 0x619d (24989)
 	                                               d  e
 	0030                                          61 9d
+
+	0x3d - 0x2a = position p[0x13]
+	0x3e - 0x2a = position p[0x14]
 
 	Location Area Identification (LAI) - 208/20/412
 	Mobile Country Code (MCC): France (208)	0x02f8
@@ -385,7 +396,7 @@ def find_cell(gsm, udpdata, t = None):
 	"""
 	if gsm.sub_type == 0x01: # Channel Type == BCCH (0)
 		p=udpdata
-		if ord(p[0x12]) == 0x1b: # Message Type: System Information Type 3
+		if ord(p[0x12]) == 0x1b: # (0x12 + 0x2a = 0x3c) Message Type: System Information Type 3
 			# FIXME
 			m=hex(ord(p[0x15]))
 			if len(m)<4:
