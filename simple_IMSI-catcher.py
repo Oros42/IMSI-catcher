@@ -353,7 +353,9 @@ def find_cell(gsm, udpdata, t = None):
 	global operator
 
 	"""
-			0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+	Dump of a packet from wireshark
+
+	        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 	0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
 	0010   00 43 9a 6b 40 00 40 11 a2 3c 7f 00 00 01 7f 00
 	0020   00 01 ed d1 12 79 00 2f fe 42 02 04 01 00 00 00
@@ -366,18 +368,18 @@ def find_cell(gsm, udpdata, t = None):
 	0030                     01
 
 	Message Type: System Information Type 3
-		                                        c
+	                                            c
 	0030                                       1b
 
 	Cell CI: 0x619d (24989)
-		                                           d  e
+	                                               d  e
 	0030                                          61 9d
 
 	Location Area Identification (LAI) - 208/20/412
 	Mobile Country Code (MCC): France (208)	0x02f8
 	Mobile Network Code (MNC): Bouygues Telecom (20) 0xf802
 	Location Area Code (LAC): 0x019c (412)
-			0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+	        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 	0030                                                02 
 	0040   f8 02 01 9c
 	"""
