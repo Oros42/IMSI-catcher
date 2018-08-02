@@ -18,9 +18,11 @@ import imp
 from optparse import OptionParser
 import subprocess
 import sys
+import distutils.spawn
 
 def find_gsm_bases():
-	scanner = imp.load_source('scanner', '/usr/bin/grgsm_scanner')
+	grgsm_scanner_path = distutils.spawn.find_executable("grgsm_scanner")
+	scanner = imp.load_source('scanner', grgsm_scanner_path)
 	sys.modules['scanner'] = scanner
 	(options, args) = scanner.argument_parser().parse_args()
 	list = scanner.do_scan(options.samp_rate, options.band, options.speed,
