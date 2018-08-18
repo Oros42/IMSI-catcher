@@ -58,11 +58,12 @@ def select_freqs(serverlist, count = 1):
 		sorted_list = sorted(listcopy, key=lambda s:
 			(operatorscount[(s.mcc,s.mnc)], s.mcc,
 			s.mnc, -s.power))
-		s = sorted_list[0]
-		freqs.append(s.freq)
-		operatorscount[(s.mcc, s.mnc)] = operatorscount[(s.mcc, s.mnc)] + 1
+		if 0 in sorted_list:
+			s = sorted_list[0]
+			freqs.append(s.freq)
+			operatorscount[(s.mcc, s.mnc)] = operatorscount[(s.mcc, s.mnc)] + 1
+			listcopy.remove(s)
 		count = count - 1
-		listcopy.remove(s)
 	return freqs
 
 def argument_parser():
@@ -79,25 +80,26 @@ def main(options = None):
 	print("Locating potential GSM base station frequencies (this can take a few minutes).")
 	list = find_gsm_bases()
 	print("Found %d frequences" % len(list))
-	numreceivers = options.numrecv
-	freqs = select_freqs(list, numreceivers)
+	if len(list) > 0:
+		numreceivers = options.numrecv
+		freqs = select_freqs(list, numreceivers)
 
-	print("Listening on the frequencies for %d potential GSM base stations." % numreceivers)
+		print("Listening on the frequencies for %d potential GSM base stations." % numreceivers)
 
-	# Make sure a user process can listen on port 4729 by asking
-	# livemon processes to listen on other ports.
-	serverport = 4730
-	procs = []
-	for freq in freqs:
-		print("Starting livemon for freqency %.0f, server on port %d" % (freq, serverport))
-		proc = subprocess.Popen(["grgsm_livemon_headless",
-			"--serverport=%d" % serverport,
-			"-f", str(freq)])
-		procs.append(proc)
-		serverport = serverport + 1
-	# Keep the processes in our process group, to make sure they all die when scan-and-livemon is killed
-	for proc in procs:
-		proc.wait()
+		# Make sure a user process can listen on port 4729 by asking
+		# livemon processes to listen on other ports.
+		serverport = 4730
+		procs = []
+		for freq in freqs:
+			print("Starting livemon for freqency %.0f, server on port %d" % (freq, serverport))
+			proc = subprocess.Popen(["grgsm_livemon_headless",
+				"--serverport=%d" % serverport,
+				"-f", str(freq)])
+			procs.append(proc)
+			serverport = serverport + 1
+		# Keep the processes in our process group, to make sure they all die when scan-and-livemon is killed
+		for proc in procs:
+			proc.wait()
 
 if __name__ == '__main__':
 	main()
