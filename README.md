@@ -21,7 +21,13 @@ git clone https://github.com/Oros42/IMSI-catcher.git
 # or wget https://github.com/Oros42/IMSI-catcher/archive/master.zip && unzip -q master.zip
 
 sudo apt install python-numpy python-scipy python-scapy
+```
 
+For Debian Testing (10) and Ubuntu 18.04+ :  
+See https://osmocom.org/projects/gr-gsm/wiki/Installation  
+
+For older Debian and Ubuntu :  
+```
 sudo add-apt-repository -y ppa:ptrkrysik/gr-gsm
 sudo apt update
 sudo apt install gr-gsm
