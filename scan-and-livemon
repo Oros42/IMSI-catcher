@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Author: Petter Reinholdtsen
+# Contributor : Oros
 # Lisence: GPL v2 or later at your own choice
 
 """
@@ -22,9 +23,13 @@ import distutils.spawn
 
 def find_gsm_bases():
 	grgsm_scanner_path = distutils.spawn.find_executable("grgsm_scanner")
+	if grgsm_scanner_path is None:
+		print("Error : Please install gr-gsm")
+		exit(1)
+        
 	scanner = imp.load_source('scanner', grgsm_scanner_path)
 	sys.modules['scanner'] = scanner
-	(options, args) = scanner.argument_parser().parse_args()
+	(options, args) = scanner.argument_parser().parse_args() #FIXME conflic with argument_parser line 93
 	list = scanner.do_scan(options.samp_rate, options.band, options.speed,
 		options.ppm, options.gain, options.args)
 	return list
@@ -46,24 +51,16 @@ def select_freqs(serverlist, count = 1):
 	for s in serverlist:
 		listcopy.append(s)
 
-		freqs = []
-		operatorscount = {}
-	# First, initialize operatorscount[] to zero for all operators
-	for s in listcopy:
-		if not (s.mcc, s.mnc) in operatorscount:
-			operatorscount[(s.mcc, s.mnc)] = 0
-	# Next, pick the number of unique frequences we want, one a the
-	# time, while trying to get as many operators as we cal.
-	while 0 < count:
-		sorted_list = sorted(listcopy, key=lambda s:
-			(operatorscount[(s.mcc,s.mnc)], s.mcc,
-			s.mnc, -s.power))
-		if 0 in sorted_list:
-			s = sorted_list[0]
+	freqs = []
+	sorted_list = sorted(listcopy, key=lambda s:(-s.power, s.mcc, s.mnc))
+
+	for s in sorted_list:
+		if count > 0:
 			freqs.append(s.freq)
-			operatorscount[(s.mcc, s.mnc)] = operatorscount[(s.mcc, s.mnc)] + 1
-			listcopy.remove(s)
+		else:
+			break
 		count = count - 1
+
 	return freqs
 
 def argument_parser():
