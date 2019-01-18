@@ -91,22 +91,18 @@ class tracker:
 		brand=""
 		operator=""
 		if mcc in self.mcc_codes:
-			if mnc in self.mcc_codes[mcc]['MNC']:
-				country=self.mcc_codes[mcc]['c'][0]
-				brand=self.mcc_codes[mcc]['MNC'][mnc][0]
-				operator=self.mcc_codes[mcc]['MNC'][mnc][1]
+			if mnc in self.mcc_codes[mcc]:
+				brand, operator, country, _ = self.mcc_codes[mcc][mnc]
 				new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
-			elif mnc+new_imsi[6:7] in self.mcc_codes[mcc]['MNC']:
+			elif mnc+new_imsi[6:7] in self.mcc_codes[mcc]:
 				mnc+=new_imsi[6:7]
-				country=self.mcc_codes[mcc]['c'][0]
-				brand=self.mcc_codes[mcc]['MNC'][mnc][0]
-				operator=self.mcc_codes[mcc]['MNC'][mnc][1]
+				brand, operator, country, _ = self.mcc_codes[mcc][mnc]
 				new_imsi=mcc+" "+mnc+" "+new_imsi[7:]
-			else:
-				country=self.mcc_codes[mcc]['c'][0]
-				brand="Unknown MNC {}".format(mnc)
-				operator="Unknown MNC {}".format(mnc)
-				new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
+		else:
+			country="Unknown MCC {}".format(mcc)
+			brand="Unknown MNC {}".format(mnc)
+			operator="Unknown MNC {}".format(mnc)
+			new_imsi=mcc+" "+mnc+" "+new_imsi[6:]
 
 		try:
 			return new_imsi, country, brand, operator
@@ -124,15 +120,8 @@ class tracker:
 		brand=""
 		operator=""
 		country = ""
-		if mcc in self.mcc_codes:
-			if mnc in self.mcc_codes[mcc]['MNC']:
-				country=self.mcc_codes[mcc]['c'][0]
-				brand=self.mcc_codes[mcc]['MNC'][mnc][0]
-				operator=self.mcc_codes[mcc]['MNC'][mnc][1]
-			else:
-				country=self.mcc_codes[mcc]['c'][0]
-				brand="Unknown MNC {}".format(mnc)
-				operator="Unknown MNC {}".format(mnc)
+		if mcc in self.mcc_codes and mnc in self.mcc_codes[mcc]:
+				brand, operator, country, _ = self.mcc_codes[mcc][mnc]
 		else:
 			country="Unknown MCC {}".format(mcc)
 			brand="Unknown MNC {}".format(mnc)

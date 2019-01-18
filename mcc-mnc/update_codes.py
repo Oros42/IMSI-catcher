@@ -64,8 +64,9 @@ for t in soup.find_all("table", class_="wikitable"):
 			Brand=td[2].text
 			Operator=td[3].text
 			if MCC not in mcc_codes:
-				mcc_codes[MCC]={'c':[country_name, country_code], 'MNC':{}}
-			mcc_codes[MCC]['MNC'][MNC]=[Brand, Operator]
+				mcc_codes[MCC]={}
+
+			mcc_codes[MCC][MNC] = [Brand, Operator, country_name, country_code]
 	except Exception:
 		pass
 
