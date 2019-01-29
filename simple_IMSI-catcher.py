@@ -406,7 +406,7 @@ def find_imsi(udpdata, t=None):
 				XX XX XX XX XX XX XX XX = IMSI 2
 					"""
 					imsi2=p[0x1F:][:8]
-				elif ord(p[0x10]) == 0x59 and ord(p[0x1E]) == 0x08 and (ord(p[0x1F]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
+				elif ord(p[0x10]) == 0x4d and ord(p[0x1E]) == 0x05 and ord(p[0x1F]) == 0xf4: # Channel 2: TCH/F (Full rate) (2)
 					# Mobile Identity - Mobile Identity 2 - IMSI
 					"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
