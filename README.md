@@ -137,12 +137,7 @@ sudo wireshark -k -Y '!icmp && gsmtap' -i lo
   
 Optional
 ========
-  
-Information about the cell tower :  
-```
-sudo python find_cell_id.py
-```
-  
+ 
 Get immediate assignment :  
 ```
 sudo python immediate_assignment_catcher.py
