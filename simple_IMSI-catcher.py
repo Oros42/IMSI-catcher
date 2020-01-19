@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # Author: Oros
-# Contributors : puyoulu, 1kali2kali, petterreinholdtsen
-# 2018/08/18
+# Contributors : puyoulu, 1kali2kali, petterreinholdtsen, nicoeg, dspinellis
+# 2020/01/19
 # License : CC0 1.0 Universal
 
 """
