@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Author: Oros
 # Contributors : puyoulu, 1kali2kali, petterreinholdtsen, nicoeg, dspinellis
