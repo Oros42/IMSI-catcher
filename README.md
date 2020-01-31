@@ -20,7 +20,7 @@ Setup
 git clone https://github.com/Oros42/IMSI-catcher.git
 # or wget https://github.com/Oros42/IMSI-catcher/archive/master.zip && unzip -q master.zip
 
-sudo apt install python-numpy python-scipy python-scapy
+sudo apt install python3-numpy python3-scipy python3-scapy
 ```
 
 For Debian Testing (10) and Ubuntu 18.04+ :  
@@ -44,7 +44,7 @@ With an old version of gr-gsm
 Open 2 terminals.  
 In terminal 1
 ```
-sudo python simple_IMSI-catcher.py --sniff
+sudo python3 simple_IMSI-catcher.py --sniff
 ```  
 You can add -h to display options.  
   
@@ -79,7 +79,7 @@ With version of gr-gsm >= 0.41.2-1
 Open 2 terminals.  
 In terminal 1
 ```
-python simple_IMSI-catcher.py
+python3 simple_IMSI-catcher.py
 ```  
 You can add -h to display options.  
 

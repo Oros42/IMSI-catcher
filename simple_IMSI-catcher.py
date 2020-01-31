@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # Author: Oros
-# Contributors : puyoulu, 1kali2kali, petterreinholdtsen, nicoeg, dspinellis
-# 2020/01/23
+# Contributors :
+#  puyoulu
+#  1kali2kali
+#  petterreinholdtsen
+#  nicoeg
+#  dspinellis
+#  fdl <Frederic.Lehobey@proxience.com>
+# 2020-01-31
 # License : CC0 1.0 Universal
 
 """
@@ -40,17 +46,17 @@ class tracker:
 	mcc_codes = None
 	sqlcon = None
 
-	ouput_function=None
+	output_function=None
 
 	def __init__(self):
 		self.load_mcc_codes()
 		self.track_this_imsi("")
-		self.ouput_function=self.ouput
+		self.output_function=self.output
 
-	def set_ouput_function(self, new_ouput_function):
-		# New ouput function need this field :
+	def set_output_function(self, new_output_function):
+		# New output function need this field :
 		# cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, timestamp, packet=None
-		self.ouput_function=new_ouput_function
+		self.output_function=new_output_function
 
 	def track_this_imsi(self, imsi_to_track):
 		self.imsi_to_track = imsi_to_track
@@ -61,7 +67,7 @@ class tracker:
 		if tmsi != "":
 			new_tmsi="0x"
 			for a in tmsi:
-				c=hex(ord(a))
+				c=hex(a)
 				if len(c)==4:
 					new_tmsi+=str(c[2])+str(c[3])
 				else:
@@ -73,7 +79,7 @@ class tracker:
 	def decode_imsi(self, imsi):
 		new_imsi=''
 		for a in imsi:
-			c=hex(ord(a))
+			c=hex(a)
 			if len(c)==4:
 				new_imsi+=str(c[3])+str(c[2])
 			else:
@@ -141,8 +147,8 @@ class tracker:
 		# FIXME Figure out proper SQL type for each attribute
 		self.sqlcon.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
 
-	def ouput(self, cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet=None):
-		print((u"{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format(str(cpt), tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, str(mcc), str(mnc), str(lac), str(cell), now.isoformat())).encode("utf-8"))
+	def output(self, cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet=None):
+		print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format(str(cpt), tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, str(mcc), str(mnc), str(lac), str(cell), now.isoformat()))
 
 	def pfields(self, cpt, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, packet=None):
 		imsicountry=""
@@ -153,7 +159,7 @@ class tracker:
 		else:
 			imsi=""
 		now = datetime.datetime.now()
-		self.ouput_function(cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet)
+		self.output_function(cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet)
 		if self.sqlcon:
 			if tmsi1 == "":
 				tmsi1 = None
@@ -168,7 +174,6 @@ class tracker:
 	def header(self):
 		print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId", "Timestamp"))
 
-	# print "Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId"
 	def register_imsi(self, arfcn, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
 		do_print=False
 		n=''
@@ -181,11 +186,11 @@ class tracker:
 				self.imsis.append(imsi1)
 				self.nb_IMSI+=1
 				n=self.nb_IMSI
-			if tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi1):
+			if self.tmsis and tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi1):
 				# new TMSI to an ISMI
 				do_print=True
 				self.tmsis[tmsi1]=imsi1
-			if tmsi2 and (tmsi2 not in self.tmsis or self.tmsis[tmsi2] != imsi1):
+			if self.tmsis and tmsi2 and (tmsi2 not in self.tmsis or self.tmsis[tmsi2] != imsi1):
 				# new TMSI to an ISMI
 				do_print=True
 				self.tmsis[tmsi2]=imsi1		
@@ -197,17 +202,18 @@ class tracker:
 				self.imsis.append(imsi2)
 				self.nb_IMSI+=1
 				n=self.nb_IMSI
-			if tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi2):
+			if self.tmsis and tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi2):
 				# new TMSI to an ISMI
 				do_print=True
 				self.tmsis[tmsi1]=imsi2
-			if tmsi2 and (tmsi2 not in self.tmsis or self.tmsis[tmsi2] != imsi2):
+			if self.tmsis and tmsi2 and (tmsi2 not in self.tmsis or self.tmsis[tmsi2] != imsi2):
 				# new TMSI to an ISMI
 				do_print=True
 				self.tmsis[tmsi2]=imsi2
 
+                # Unreachable or rarely reached branch? Add unit-test.
 		if not imsi1 and not imsi2 and tmsi1 and tmsi2:
-			if tmsi2 in self.tmsis:
+			if self.tmsis and tmsi2 in self.tmsis:
 				# switch the TMSI
 				do_print=True
 				imsi1=self.tmsis[tmsi2]
@@ -223,9 +229,9 @@ class tracker:
 		if not imsi1 and not imsi2:
 			# Register IMSI as seen if a TMSI believed to
 			# belong to the IMSI is seen.
-			if tmsi1 and tmsi1 in self.tmsis \
-			   and ""!= self.tmsis[tmsi1]:
-				self.imsi_seen(self.tmsis[tmsi1], arfcn)
+			if self.tmsis and tmsi1 and tmsi1 in self.tmsis \
+			    and ""!= self.tmsis[tmsi1]:
+				  self.imsi_seen(self.tmsis[tmsi1], arfcn)
 			if self.show_all_tmsi:
 				do_print=False
 				if tmsi1 and tmsi1 not in self.tmsis:
@@ -336,25 +342,25 @@ def find_cell(gsm, udpdata, t = None):
 	0040   f8 02 01 9c
 	"""
 	if gsm.sub_type == 0x01: # Channel Type == BCCH (0)
-		p=udpdata
-		if ord(p[0x12]) == 0x1b: # (0x12 + 0x2a = 0x3c) Message Type: System Information Type 3
+		p=bytearray(udpdata)
+		if p[0x12] == 0x1b: # (0x12 + 0x2a = 0x3c) Message Type: System Information Type 3
 			# FIXME
-			m=hex(ord(p[0x15]))
+			m=hex(p[0x15])
 			if len(m)<4:
 				mcc=m[2]+'0'
 			else:
 				mcc=m[3]+m[2]
-			mcc+=str(ord(p[0x16]) & 0x0f)
+			mcc+=str(p[0x16] & 0x0f)
 
 			# FIXME not works with mnc like 005 or 490
-			m=hex(ord(p[0x17]))
+			m=hex(p[0x17])
 			if len(m)<4:
 				mnc=m[2]+'0'
 			else:
 				mnc=m[3]+m[2]
 
-			lac=ord(p[0x18])*256+ord(p[0x19])
-			cell=ord(p[0x13])*256+ord(p[0x14])
+			lac=p[0x18]*256+p[0x19]
+			cell=p[0x13]*256+p[0x14]
 			t.current_cell(mcc, mnc, lac, cell)
 
 def find_imsi(udpdata, t=None):
@@ -363,8 +369,7 @@ def find_imsi(udpdata, t=None):
 
 	# Create object representing gsmtap header in UDP payload
 	gsm = gsmtap_hdr.from_buffer_copy(udpdata)
-	#print gsm
-
+	
 	if gsm.sub_type == 0x1: # Channel Type == BCCH (0)
 		# Update global cell info if found in package
 		# FIXME : when you change the frequency, this informations is
@@ -372,13 +377,13 @@ def find_imsi(udpdata, t=None):
 		# printing IMSI :-/
 		find_cell(gsm, udpdata, t=t)
 	else: # Channel Type != BCCH (0)
-		p=udpdata
+		p=bytearray(udpdata)
 		tmsi1=""
 		tmsi2=""
 		imsi1=""
 		imsi2=""
-		if ord(p[0x12]) == 0x21: # Message Type: Paging Request Type 1
-			if ord(p[0x14]) == 0x08 and (ord(p[0x15]) & 0x1) == 0x1: # Channel 1: TCH/F (Full rate) (2)
+		if p[0x12] == 0x21: # Message Type: Paging Request Type 1
+			if p[0x14] == 0x08 and (p[0x15] & 0x1) == 0x1: # Channel 1: TCH/F (Full rate) (2)
 				# Mobile Identity 1 Type: IMSI (1)
 				"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -391,8 +396,8 @@ def find_imsi(udpdata, t=None):
 				XX XX XX XX XX XX XX XX = IMSI
 				"""
 				imsi1=p[0x15:][:8]
-				# ord(p[0x10]) == 0x59 = l2 pseudo length value: 22
-				if ord(p[0x10]) == 0x59 and ord(p[0x1E]) == 0x08 and (ord(p[0x1F]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
+				# p[0x10] == 0x59 = l2 pseudo length value: 22
+				if p[0x10] == 0x59 and p[0x1E] == 0x08 and (p[0x1F] & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
 					# Mobile Identity 2 Type: IMSI (1)
 					"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -406,7 +411,7 @@ def find_imsi(udpdata, t=None):
 				XX XX XX XX XX XX XX XX = IMSI 2
 					"""
 					imsi2=p[0x1F:][:8]
-				elif ord(p[0x10]) == 0x4d and ord(p[0x1E]) == 0x05 and ord(p[0x1F]) == 0xf4: # Channel 2: TCH/F (Full rate) (2)
+				elif p[0x10] == 0x4d and p[0x1E] == 0x05 and p[0x1F] == 0xf4: # Channel 2: TCH/F (Full rate) (2)
 					# Mobile Identity - Mobile Identity 2 - IMSI
 					"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -423,7 +428,7 @@ def find_imsi(udpdata, t=None):
 
 				t.register_imsi(gsm.arfcn, imsi1, imsi2, tmsi1, tmsi2, p)
 
-			elif ord(p[0x1B]) == 0x08 and (ord(p[0x1C]) & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
+			elif p[0x1B] == 0x08 and (p[0x1C] & 0x1) == 0x1: # Channel 2: TCH/F (Full rate) (2)
 				# Mobile Identity 2 Type: IMSI (1)
 				"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
@@ -440,7 +445,7 @@ def find_imsi(udpdata, t=None):
 				imsi2=p[0x1C:][:8]
 				t.register_imsi(gsm.arfcn, imsi1, imsi2, tmsi1, tmsi2, p)
 
-			elif ord(p[0x14]) == 0x05 and (ord(p[0x15]) & 0x07) == 4: # Mobile Identity - Mobile Identity 1 - TMSI/P-TMSI 
+			elif p[0x14] == 0x05 and (p[0x15] & 0x07) == 4: # Mobile Identity - Mobile Identity 1 - TMSI/P-TMSI 
 				"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
 				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
@@ -453,15 +458,15 @@ def find_imsi(udpdata, t=None):
 				YY YY YY YY = TMSI/P-TMSI - Mobile Identity 2
 				"""
 				tmsi1=p[0x16:][:4]
-				if ord(p[0x1B]) == 0x05 and (ord(p[0x1C]) & 0x07) == 4: # Mobile Identity - Mobile Identity 2 - TMSI/P-TMSI 
+				if p[0x1B] == 0x05 and (p[0x1C] & 0x07) == 4: # Mobile Identity - Mobile Identity 2 - TMSI/P-TMSI 
 					tmsi2=p[0x1D:][:4]
 				else:
 					tmsi2=""
 
 				t.register_imsi(gsm.arfcn, imsi1, imsi2, tmsi1, tmsi2, p)
 
-		elif ord(p[0x12]) == 0x22: # Message Type: Paging Request Type 2
-			if ord(p[0x1D]) == 0x08 and (ord(p[0x1E]) & 0x1) == 0x1: # Mobile Identity 3 Type: IMSI (1)
+		elif p[0x12] == 0x22: # Message Type: Paging Request Type 2
+			if p[0x1D] == 0x08 and (p[0x1E] & 0x1) == 0x1: # Mobile Identity 3 Type: IMSI (1)
 				"""
 				        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f				
 				0000   00 00 00 00 00 00 00 00 00 00 00 00 08 00 45 00
@@ -488,8 +493,8 @@ def udpserver(port, prn):
 		if prn:
 			prn(udpdata)
 
-def find_imsi_from_pkg(p):
-	udpdata = str(p[UDP].payload)
+def find_imsi_from_pkt(p):
+	udpdata = bytes(p[UDP].payload)
 	find_imsi(udpdata)
 
 if __name__ == "__main__":
@@ -530,7 +535,7 @@ if __name__ == "__main__":
 	if options.sniff:
 		from scapy.all import sniff, UDP
 		imsitracker.header()
-		sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi_from_pkg, store=0)
+		sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi_from_pkt, store=0)
 	else:
 		imsitracker.header()
 		udpserver(port=options.port, prn=find_imsi)
