@@ -42,6 +42,9 @@ class tracker:
 	brand=""
 	operator=""
 
+	# in minutes
+	purgeTimer = 10 # default 10 min
+
 	show_all_tmsi = False
 	mcc_codes = None
 	sqlcon = None
@@ -257,11 +260,15 @@ class tracker:
 		self.imsi_purge_old()
 	def imsi_purge_old(self):
 		now = datetime.datetime.utcnow().replace(microsecond=0)
-		maxage = datetime.timedelta(minutes=10)
+		maxage = datetime.timedelta(minutes=self.purgeTimer)
 		limit = now - maxage
-		for imsi in self.imsistate.keys():
-			if limit > self.imsistate[imsi]["lastseen"]:
-				del self.imsistate[imsi]
+		remove = [imsi for imsi in self.imsistate if limit > self.imsistate[imsi]["lastseen"]]
+		for k in remove: del self.imsistate[k]
+		#keys = self.imsistate.keys()
+		#for imsi in keys:
+		#	if limit > self.imsistate[imsi]["lastseen"]:
+		#		del self.imsistate[imsi]
+		#		keys = self.imsistate.keys()
 
 class gsmtap_hdr(ctypes.BigEndianStructure):
 	_pack_ = 1
