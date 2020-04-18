@@ -180,6 +180,8 @@ class tracker:
 	def register_imsi(self, arfcn, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
 		do_print=False
 		n=''
+		tmsi1 = self.str_tmsi(tmsi1)
+		tmsi2 = self.str_tmsi(tmsi2)
 		if imsi1: self.imsi_seen(imsi1, arfcn)
 		if imsi2: self.imsi_seen(imsi2, arfcn)
 		if imsi1 and (not self.imsi_to_track or imsi1[:self.imsi_to_track_len] == self.imsi_to_track):
@@ -225,9 +227,9 @@ class tracker:
 
 		if do_print:
 			if imsi1:
-				self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), imsi1, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+				self.pfields(str(n), tmsi1, tmsi2, imsi1, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
 			if imsi2:
-				self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), imsi2, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+				self.pfields(str(n), tmsi1, tmsi2, imsi2, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
 
 		if not imsi1 and not imsi2:
 			# Register IMSI as seen if a TMSI believed to
@@ -244,7 +246,8 @@ class tracker:
 					do_print=True
 					self.tmsis[tmsi2]=""
 				if do_print:
-					self.pfields(str(n), self.str_tmsi(tmsi1), self.str_tmsi(tmsi2), None, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+					self.pfields(str(n), tmsi1, tmsi2, None, str(self.mcc), str(self.mnc), str(self.lac), str(self.cell), p)
+
 	def imsi_seen(self, imsi, arfcn):
 		now = datetime.datetime.utcnow().replace(microsecond=0)
 		imsi, mcc, mnc = self.decode_imsi(imsi)
@@ -258,6 +261,7 @@ class tracker:
 				"arfcn" : arfcn,
 			}
 		self.imsi_purge_old()
+
 	def imsi_purge_old(self):
 		now = datetime.datetime.utcnow().replace(microsecond=0)
 		maxage = datetime.timedelta(minutes=self.purgeTimer)
@@ -287,6 +291,7 @@ class gsmtap_hdr(ctypes.BigEndianStructure):
 		("sub_slot", ctypes.c_ubyte),
 		("res", ctypes.c_ubyte),
 		]
+
 	def __repr__(self):
 		return "%s(version=%d, hdr_len=%d, type=%d, timeslot=%d, arfcn=%d, signal_dbm=%d, snr_db=%d, frame_number=%d, sub_type=%d, antenna_nr=%d, sub_slot=%d, res=%d)" % (
 			self.__class__, self.version, self.hdr_len, self.type,
