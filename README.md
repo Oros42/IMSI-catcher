@@ -134,7 +134,14 @@ You can watch GSM packets with
 ```
 sudo wireshark -k -Y '!icmp && gsmtap' -i lo
 ```
-  
+
+Docker
+======
+```bash
+docker pull atomicpowerman/imsi-catcher
+docker run -ti --net=host -e DISPLAY=$DISPLAY --privileged -v /dev/bus/usb:/dev/bus/usb  atomicpowerman/imsi-catcher bash
+```
+
 Optional
 ========
  
