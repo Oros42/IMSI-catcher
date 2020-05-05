@@ -7,15 +7,17 @@ This program shows you IMSI numbers, country, brand and operator of cellphones a
 ![screenshot0](capture_simple_IMSI-catcher.png)  
   
 
-What you need
-=============
+## What you need
+
 1 PC  
 1 [USB DVB-T key (RTL2832U)](https://osmocom.org/projects/sdr/wiki/rtl-sdr) with antenna (less than 15$) or a [OsmocomBB phone](https://osmocom.org/projects/baseband/wiki/Phones)   or [HackRF](https://greatscottgadgets.com/hackrf/)  
   
   
-Setup
-=====
+## Setup
 
+You have the choice with 2 types of install.  
+
+### version 1 in your OS
 ```
 git clone https://github.com/Oros42/IMSI-catcher.git
 # or wget https://github.com/Oros42/IMSI-catcher/archive/master.zip && unzip -q master.zip
@@ -35,11 +37,18 @@ sudo apt install gr-gsm
 If gr-gsm failled to setup. Try this setup : https://github.com/ptrkrysik/gr-gsm/wiki/Installation  
 Debian : https://tracker.debian.org/pkg/gr-gsm  
 
-Run
-===
+
+### version 2 with Docker
+
+```bash
+docker pull atomicpowerman/imsi-catcher
+docker run -ti --net=host -e DISPLAY=$DISPLAY --privileged -v /dev/bus/usb:/dev/bus/usb  atomicpowerman/imsi-catcher bash
+```
+
+
+## Run
   
-With an old version of gr-gsm
------------------------------
+### With an old version of gr-gsm
   
 Open 2 terminals.  
 In terminal 1
@@ -73,8 +82,7 @@ You can change the frequency if you want.
 
 
 
-With version of gr-gsm >= 0.41.2-1
-----------------------------------
+### With version of gr-gsm >= 0.41.2-1
 
 Open 2 terminals.  
 In terminal 1
@@ -121,8 +129,8 @@ It should start producing output like :
 
 You can change the frequency if you want.
 
-For all
--------
+### For all
+
 
 Now, watch terminal 1 and wait. IMSI numbers should appear :-)  
 If nothing appears after 1 min, change the frequency.  
@@ -135,15 +143,7 @@ You can watch GSM packets with
 sudo wireshark -k -Y '!icmp && gsmtap' -i lo
 ```
 
-Docker
-======
-```bash
-docker pull atomicpowerman/imsi-catcher
-docker run -ti --net=host -e DISPLAY=$DISPLAY --privileged -v /dev/bus/usb:/dev/bus/usb  atomicpowerman/imsi-catcher bash
-```
-
-Optional
-========
+## Optional
  
 Get immediate assignment :  
 ```
@@ -177,8 +177,7 @@ GSM-900:
 ...
 ```
   
-Links
-=====
+# Links
 
 Setup of Gr-Gsm : https://github.com/ptrkrysik/gr-gsm/wiki/Installation  
 Frequency : http://www.worldtimezone.com/gsm.html and https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications  
