@@ -22,19 +22,9 @@ This program shows you IMSI numbers of cellphones around you.
 import ctypes
 import json
 from optparse import OptionParser
-from decouple import config
 import datetime
 import io
 import socket
-import MySQLdb as mdb
-
-con = mdb.connect(
-    config("MYSQL_HOST"),
-    config("MYSQL_USER"),
-    config("MYSQL_PASSWORD"),
-    config("MYSQL_DB")
-)
-cur = con.cursor()
 
 imsitracker = None
 
@@ -170,11 +160,23 @@ class tracker:
         self.textfile = filename
 
     def mysql_file(self):
-        self.db = con.cursor()
-        if self.db:
-            print("mysql connection is success :)")
+        global con
+        global cur
+        import os.path
+        if os.path.isfile('.env'):
+            import MySQLdb as mdb
+            from decouple import config
+            con = mdb.connect(config("MYSQL_HOST"), config("MYSQL_USER"), config("MYSQL_PASSWORD"), config("MYSQL_DB"))
+            cur = con.cursor()
+            # Check MySQL connection
+            if cur:
+                print("mysql connection is success :)")
+            else:
+                print("mysql connection is failed!")
+                exit()
         else:
-            print("mysql connection is failed!")
+            print("create file .env first")
+            exit()
 
     def output(self, cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet=None):
         print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format(str(cpt), tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, str(mcc), str(mnc), str(lac), str(cell), now.isoformat()))
@@ -212,13 +214,11 @@ class tracker:
                 tmsi1 = None
             if tmsi2 == "":
                 tmsi2 = None
-
+            # Example query
             query = ("INSERT INTO `imsi` (`tmsi1`, `tmsi2`, `imsi`,`mcc`, `mnc`, `lac`, `cell_id`, `stamp`, `deviceid`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
             arg = (tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, now, "rtl")
             cur.execute(query, arg)
             con.commit()
-        else:
-            print("Failed! check your db connection")
 
     def header(self):
         print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId", "Timestamp"))
