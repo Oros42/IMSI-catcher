@@ -50,7 +50,7 @@ class tracker:
     show_all_tmsi = False
     mcc_codes = None
     sqlcon = None
-    textfile = None
+    textfilePath = None
 
     output_function = None
 
@@ -157,7 +157,7 @@ class tracker:
         txt = open(filename, "w")
         txt.write("start\n")
         txt.close()
-        self.textfile = filename
+        self.textfilePath = filename
 
     def mysql_file(self):
         global con
@@ -202,9 +202,9 @@ class tracker:
             )
             self.sqlcon.commit()
 
-        if self.textfile:
+        if self.textfilePath:
             now = datetime.datetime.now()
-            txt = open(self.textfile, "a")
+            txt = open(self.textfilePath, "a")
             txt.write(str(now) + ", " + tmsi1 + ", " + tmsi2 + ", " + imsi + ", " + imsicountry + ", " + imsibrand + ", " + imsioperator + ", " + mcc + ", " + mnc + ", " + lac + ", " + cell + "\n")
             txt.close()
 
@@ -580,7 +580,7 @@ if __name__ == "__main__":
         imsitracker.sqlite_file(options.sqlite)
 
     if options.txt:
-        imsitracker.txtfile(options.txt)
+        imsitracker.textfilePath(options.txt)
 
     if options.mysql:
         imsitracker.mysql_file()
