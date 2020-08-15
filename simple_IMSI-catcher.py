@@ -9,7 +9,7 @@
 #  nicoeg
 #  dspinellis
 #  fdl <Frederic.Lehobey@proxience.com>
-# 2020-01-31
+# 2020-08-15
 # License : CC0 1.0 Universal
 
 """
@@ -49,9 +49,10 @@ class tracker:
 
     show_all_tmsi = False
     mcc_codes = None
-    sqlcon = None
+    sqlite_con = None
+    mysql_con = None
+    mysql_cur = None
     textfilePath = None
-
     output_function = None
 
     def __init__(self):
@@ -149,27 +150,25 @@ class tracker:
     def sqlite_file(self, filename):
         import sqlite3  # Avoid pulling in sqlite3 when not saving
         print("Saving to SQLite database in %s" % filename)
-        self.sqlcon = sqlite3.connect(filename)
+        self.sqlite_con = sqlite3.connect(filename)
         # FIXME Figure out proper SQL type for each attribute
-        self.sqlcon.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
+        self.sqlite_con.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
 
-    def textfile(self, filename):
+    def text_file(self, filename):
         txt = open(filename, "w")
         txt.write("start\n")
         txt.close()
         self.textfilePath = filename
 
     def mysql_file(self):
-        global con
-        global cur
         import os.path
         if os.path.isfile('.env'):
             import MySQLdb as mdb
             from decouple import config
-            con = mdb.connect(config("MYSQL_HOST"), config("MYSQL_USER"), config("MYSQL_PASSWORD"), config("MYSQL_DB"))
-            cur = con.cursor()
+            self.mysql_con = mdb.connect(config("MYSQL_HOST"), config("MYSQL_USER"), config("MYSQL_PASSWORD"), config("MYSQL_DB"))
+            self.mysql_cur = self.mysql_con.cursor()
             # Check MySQL connection
-            if cur:
+            if self.mysql_cur:
                 print("mysql connection is success :)")
             else:
                 print("mysql connection is failed!")
@@ -191,16 +190,6 @@ class tracker:
             imsi = ""
         now = datetime.datetime.now()
         self.output_function(cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet)
-        if self.sqlcon:
-            if tmsi1 == "":
-                tmsi1 = None
-            if tmsi2 == "":
-                tmsi2 = None
-            self.sqlcon.execute(
-                u"INSERT INTO observations (stamp, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                (now, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell)
-            )
-            self.sqlcon.commit()
 
         if self.textfilePath:
             now = datetime.datetime.now()
@@ -208,17 +197,25 @@ class tracker:
             txt.write(str(now) + ", " + tmsi1 + ", " + tmsi2 + ", " + imsi + ", " + imsicountry + ", " + imsibrand + ", " + imsioperator + ", " + mcc + ", " + mnc + ", " + lac + ", " + cell + "\n")
             txt.close()
 
-        if cur:
+        if tmsi1 == "":
+            tmsi1 = None
+        if tmsi2 == "":
+            tmsi2 = None
+
+        if self.sqlite_con:
+            self.sqlite_con.execute(
+                u"INSERT INTO observations (stamp, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+                (now, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell)
+            )
+            self.sqlite_con.commit()
+
+        if self.mysql_cur:
             print("saving data to db...")
-            if tmsi1 == "":
-                tmsi1 = None
-            if tmsi2 == "":
-                tmsi2 = None
             # Example query
             query = ("INSERT INTO `imsi` (`tmsi1`, `tmsi2`, `imsi`,`mcc`, `mnc`, `lac`, `cell_id`, `stamp`, `deviceid`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
             arg = (tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, now, "rtl")
-            cur.execute(query, arg)
-            con.commit()
+            self.mysql_cur.execute(query, arg)
+            self.mysql_con.commit()
 
     def header(self):
         print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId", "Timestamp"))
@@ -573,14 +570,14 @@ if __name__ == "__main__":
     parser.add_option("-s", "--sniff", action="store_true", dest="sniff", help="sniff on interface instead of listening on port (require root/suid access)")
     parser.add_option("-w", "--sqlite", dest="sqlite", default=None, type="string", help="Save observed IMSI values to specified SQLite file")
     parser.add_option("-t", "--txt", dest="txt", default=None, type="string", help="Save observed IMSI values to specified TXT file")
-    parser.add_option("-z", "--mysql", action="store_true", dest="mysql", help="Save observed IMSI values to specified MYSQL DB")
+    parser.add_option("-z", "--mysql", action="store_true", dest="mysql", help="Save observed IMSI values to specified MYSQL DB (copy .env.dist to .env and edit it)")
     (options, args) = parser.parse_args()
 
     if options.sqlite:
         imsitracker.sqlite_file(options.sqlite)
 
     if options.txt:
-        imsitracker.textfilePath(options.txt)
+        imsitracker.text_file(options.txt)
 
     if options.mysql:
         imsitracker.mysql_file()
