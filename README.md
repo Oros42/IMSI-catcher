@@ -94,7 +94,7 @@ docker run -ti --net=host -e DISPLAY=$DISPLAY --privileged -v /dev/bus/usb:/dev/
 
 ## Run
   
-### With an old version of gr-gsm
+### With version of gr-gsm < 0.41
   
 Open 2 terminals.  
 In terminal 1
@@ -124,11 +124,9 @@ It should start producing output like :
 49 06 1b 95 cc 02 f8 02 01 9c c8 03 1e 57 a5 01 79 00 00 1c 13 2b 2b
 ...
 ```
-You can change the frequency if you want.
+You can change the frequency if you want.  
 
-
-
-### With version of gr-gsm >= 0.41.2-1
+### With version of gr-gsm >= 0.41.2-1
 
 Open 2 terminals.  
 In terminal 1
