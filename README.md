@@ -46,6 +46,17 @@ docker run -ti --net=host -e DISPLAY=$DISPLAY --privileged -v /dev/bus/usb:/dev/
 ```
 
 
+### setup mysql
+=> tested on: macos
+```
+1. change .env.dist to .env
+2. add detail mysql (MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DB) to .env
+3. Sample DB: `db-example.sql`
+4. install package: `python-decouple` and mysql client(`mysqlclient`)
+5. run `python simple_IMSI-catcher.py --mysql --sniff`
+```
+
+
 ## Run
   
 ### With an old version of gr-gsm
