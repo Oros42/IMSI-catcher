@@ -25,10 +25,45 @@ git clone https://github.com/Oros42/IMSI-catcher.git
 sudo apt install python3-numpy python3-scipy python3-scapy
 ```
 
-For Debian Testing (10) and Ubuntu 18.04+ :  
-See https://osmocom.org/projects/gr-gsm/wiki/Installation  
+#### gr-gsm for Ubuntu 20.04+
+```
+sudo apt-get install -y \
+    cmake \
+    autoconf \
+    libtool \
+    pkg-config \
+    build-essential \
+    python-docutils \
+    libcppunit-dev \
+    swig \
+    doxygen \
+    liblog4cpp5-dev \
+    gnuradio-dev \
+    gr-osmosdr \
+    libosmocore-dev \
+    liborc-0.4-dev
 
-For older Debian and Ubuntu :  
+git clone -b maint-3.8 https://github.com/velichkov/gr-gsm.git
+cd gr-gsm
+mkdir build
+cd build
+cmake ..
+make -j 4
+sudo make install
+sudo ldconfig
+echo 'export PYTHONPATH=/usr/local/lib/python3/dist-packages/:$PYTHONPATH' >> ~/.bashrc
+```
+
+#### gr-gsm for Debian Testing (10) and Ubuntu 18.04+ :  
+See https://osmocom.org/projects/gr-gsm/wiki/Installation#Installation-from-packages-on-Debian-Testing-and-Ubuntu-1804  
+```
+sudo apt-get install gr-gsm
+wget http://git.osmocom.org/gr-gsm/plain/apps/grgsm_livemon.grc
+grcc -d . grgsm_livemon.grc
+mv grgsm_livemon.py grgsm_livemon
+```
+
+#### gr-gsm for older Debian and Ubuntu :  
 ```
 sudo add-apt-repository -y ppa:ptrkrysik/gr-gsm
 sudo apt update
