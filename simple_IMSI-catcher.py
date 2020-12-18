@@ -156,7 +156,7 @@ class tracker:
 
     def text_file(self, filename):
         txt = open(filename, "w")
-        txt.write("start\n")
+        txt.write("stamp, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell\n")
         txt.close()
         self.textfilePath = filename
 
