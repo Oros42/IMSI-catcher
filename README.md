@@ -57,9 +57,22 @@ sudo apt-get install -y \
     gnuradio-dev \
     gr-osmosdr \
     libosmocore-dev \
-    liborc-0.4-dev
-
+    liborc-0.4-dev \
+    swig
+```
+```bash
+gnuradio-config-info -v
+```
+if >= 3.8  
+```bash
 git clone -b maint-3.8 https://github.com/velichkov/gr-gsm.git
+```
+else (3.7)  
+```bash
+git clone https://git.osmocom.org/gr-gsm
+```
+  
+```bash
 cd gr-gsm
 mkdir build
 cd build
@@ -199,7 +212,7 @@ python3 simple_IMSI-catcher.py
 
 # Links
 
-Setup of Gr-Gsm : https://github.com/ptrkrysik/gr-gsm/wiki/Installation  
+Setup of Gr-Gsm : https://osmocom.org/projects/gr-gsm/wiki/Installation and https://github.com/velichkov/gr-gsm  
 Frequency : http://www.worldtimezone.com/gsm.html and https://fr.wikipedia.org/wiki/Global_System_for_Mobile_Communications  
 Mobile Network Code : https://en.wikipedia.org/wiki/Mobile_Network_Code  
 Scapy : http://secdev.org/projects/scapy/doc/usage.html  
