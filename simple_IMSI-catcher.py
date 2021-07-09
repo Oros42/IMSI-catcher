@@ -151,6 +151,7 @@ class tracker:
         import sqlite3  # Avoid pulling in sqlite3 when not saving
         print("Saving to SQLite database in %s" % filename)
         self.sqlite_con = sqlite3.connect(filename)
+        self.sqlite_con.text_factory = str
         # FIXME Figure out proper SQL type for each attribute
         self.sqlite_con.execute("CREATE TABLE IF NOT EXISTS observations(stamp datetime, tmsi1 text, tmsi2 text, imsi text, imsicountry text, imsibrand text, imsioperator text, mcc integer, mnc integer, lac integer, cell integer);")
 
@@ -178,7 +179,7 @@ class tracker:
             exit()
 
     def output(self, cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet=None):
-        print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format(str(cpt), tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, str(mcc), str(mnc), str(lac), str(cell), now.isoformat()))
+        print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format(str(cpt), tmsi1, tmsi2, imsi, imsicountry.encode('utf-8'), imsibrand.encode('utf-8'), imsioperator.encode('utf-8'), str(mcc), str(mnc), str(lac), str(cell), now.isoformat()))
 
     def pfields(self, cpt, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, packet=None):
         imsicountry = ""
@@ -193,8 +194,8 @@ class tracker:
 
         if self.textfilePath:
             now = datetime.datetime.now()
-            txt = open(self.textfilePath, "a")
-            txt.write(str(now) + ", " + tmsi1 + ", " + tmsi2 + ", " + imsi + ", " + imsicountry + ", " + imsibrand + ", " + imsioperator + ", " + mcc + ", " + mnc + ", " + lac + ", " + cell + "\n")
+            txt = open(self.textfilePath, "ab")
+            txt.write(str(now) + ", " + tmsi1 + ", " + tmsi2 + ", " + imsi + ", " + imsicountry.encode('utf-8') + ", " + imsibrand.encode('utf-8') + ", " + imsioperator.encode('utf-8') + ", " + mcc + ", " + mnc + ", " + lac + ", " + cell + "\n")
             txt.close()
 
         if tmsi1 == "":
@@ -205,7 +206,7 @@ class tracker:
         if self.sqlite_con:
             self.sqlite_con.execute(
                 u"INSERT INTO observations (stamp, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                (now, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell)
+                (now, tmsi1, tmsi2, imsi, imsicountry.encode('utf-8'), imsibrand.encode('utf-8'), imsioperator.encode('utf-8'), mcc, mnc, lac, cell)
             )
             self.sqlite_con.commit()
 
@@ -315,9 +316,9 @@ class tracker:
             del self.imsistate[k]
         # keys = self.imsistate.keys()
         # for imsi in keys:
-        # 	if limit > self.imsistate[imsi]["lastseen"]:
-        # 		del self.imsistate[imsi]
-        # 		keys = self.imsistate.keys()
+        #   if limit > self.imsistate[imsi]["lastseen"]:
+        #       del self.imsistate[imsi]
+        #       keys = self.imsistate.keys()
 
 
 class gsmtap_hdr(ctypes.BigEndianStructure):
@@ -393,7 +394,7 @@ def find_cell(gsm, udpdata, t=None):
     0x3e - 0x2a = position p[0x14]
 
     Location Area Identification (LAI) - 208/20/412
-    Mobile Country Code (MCC): France (208)	0x02f8
+    Mobile Country Code (MCC): France (208) 0x02f8
     Mobile Network Code (MNC): Bouygues Telecom (20) 0xf802
     Location Area Code (LAC): 0x019c (412)
             0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
