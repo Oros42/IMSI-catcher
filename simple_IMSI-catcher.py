@@ -108,11 +108,11 @@ class tracker:
         if mcc in self.mcc_codes:
             if mnc in self.mcc_codes[mcc]:
                 brand, operator, country, _ = self.mcc_codes[mcc][mnc]
-                new_imsi = mcc + " " + mnc + " " + new_imsi[6:]
+                new_imsi = f"{mcc} {mnc} {new_imsi[6:]}"
             elif mnc + new_imsi[6:7] in self.mcc_codes[mcc]:
                 mnc += new_imsi[6:7]
                 brand, operator, country, _ = self.mcc_codes[mcc][mnc]
-                new_imsi = mcc + " " + mnc + " " + new_imsi[7:]
+                new_imsi = f"{mcc} {mnc} {new_imsi[7:]}"
 
         else:
             country = f"Unknown MCC {mcc}"
@@ -182,7 +182,7 @@ class tracker:
             exit()
 
     def output(self, cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet=None):
-        print(f"{str(cpt):7s} ; {tmsi1:10s} ; {tmsi2:10s} ; {imsi:17s} ; {imsicountry:14s} ; {imsibrand:10s} ; {imsioperator:21s} ; {str(mcc):4s} ; {str(mnc):5s} ; {str(lac):6s} ; {str(cell):6s} ; {now.isoformat():s}")
+        print(f"{str(cpt):7s} ; {tmsi1:10s} ; {tmsi2:10s} ; {imsi:17s} ; {imsicountry:16s} ; {imsibrand:14s} ; {imsioperator:21s} ; {str(mcc):4s} ; {str(mnc):5s} ; {str(lac):6s} ; {str(cell):6s} ; {now.isoformat():s}")
 
     def pfields(self, cpt, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, packet=None):
         imsicountry = ""
@@ -223,7 +223,7 @@ class tracker:
             self.mysql_con.commit()
 
     def header(self):
-        print(f"{'Nb IMSI':7s} ; {'TMSI-1':10s} ; {'TMSI-2':10s} ; {'IMSI':17s} ; {'country':14s} ; {'brand':10s} ; {'operator':21s} ; {'MCC':4s} ; {'MNC':5s} ; {'LAC':6s} ; {'CellId':6s} ; {'Timestamp':s}")
+        print(f"{'Nb IMSI':7s} ; {'TMSI-1':10s} ; {'TMSI-2':10s} ; {'IMSI':17s} ; {'country':16s} ; {'brand':14s} ; {'operator':21s} ; {'MCC':4s} ; {'MNC':5s} ; {'LAC':6s} ; {'CellId':6s} ; {'Timestamp':s}")
 
     def register_imsi(self, arfcn, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
         do_print = False
