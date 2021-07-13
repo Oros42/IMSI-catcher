@@ -9,6 +9,7 @@
 #  nicoeg
 #  dspinellis
 #  fdl <Frederic.Lehobey@proxience.com>
+#  lapolis
 # 2020-08-15
 # License : CC0 1.0 Universal
 
@@ -103,19 +104,21 @@ class tracker:
         country = ""
         brand = ""
         operator = ""
+
         if mcc in self.mcc_codes:
             if mnc in self.mcc_codes[mcc]:
                 brand, operator, country, _ = self.mcc_codes[mcc][mnc]
-                new_imsi = mcc + " " + mnc + " " + new_imsi[6:]
+                new_imsi = f"{mcc} {mnc} {new_imsi[6:]}"
             elif mnc + new_imsi[6:7] in self.mcc_codes[mcc]:
                 mnc += new_imsi[6:7]
                 brand, operator, country, _ = self.mcc_codes[mcc][mnc]
-                new_imsi = mcc + " " + mnc + " " + new_imsi[7:]
+                new_imsi = f"{mcc} {mnc} {new_imsi[7:]}"
+
         else:
-            country = "Unknown MCC {}".format(mcc)
-            brand = "Unknown MNC {}".format(mnc)
-            operator = "Unknown MNC {}".format(mnc)
-            new_imsi = mcc + " " + mnc + " " + new_imsi[6:]
+            country = f"Unknown MCC {mcc}"
+            brand = f"Unknown MNC {mnc}"
+            operator = f"Unknown MNC {mnc}"
+            new_imsi = f"{mcc} {mnc} {new_imsi[6:]}"
 
         try:
             return new_imsi, country, brand, operator
@@ -136,9 +139,9 @@ class tracker:
         if mcc in self.mcc_codes and mnc in self.mcc_codes[mcc]:
             brand, operator, country, _ = self.mcc_codes[mcc][mnc]
         else:
-            country = "Unknown MCC {}".format(mcc)
-            brand = "Unknown MNC {}".format(mnc)
-            operator = "Unknown MNC {}".format(mnc)
+            country = f"Unknown MCC {mcc}"
+            brand = f"Unknown MNC {mnc}"
+            operator = f"Unknown MNC {mnc}"
         self.mcc = str(mcc)
         self.mnc = str(mnc)
         self.lac = str(lac)
@@ -179,7 +182,7 @@ class tracker:
             exit()
 
     def output(self, cpt, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell, now, packet=None):
-        print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format(str(cpt), tmsi1, tmsi2, imsi, imsicountry.encode('utf-8'), imsibrand.encode('utf-8'), imsioperator.encode('utf-8'), str(mcc), str(mnc), str(lac), str(cell), now.isoformat()))
+        print(f"{str(cpt):7s} ; {tmsi1:10s} ; {tmsi2:10s} ; {imsi:17s} ; {imsicountry:16s} ; {imsibrand:14s} ; {imsioperator:21s} ; {str(mcc):4s} ; {str(mnc):5s} ; {str(lac):6s} ; {str(cell):6s} ; {now.isoformat():s}")
 
     def pfields(self, cpt, tmsi1, tmsi2, imsi, mcc, mnc, lac, cell, packet=None):
         imsicountry = ""
@@ -194,8 +197,8 @@ class tracker:
 
         if self.textfilePath:
             now = datetime.datetime.now()
-            txt = open(self.textfilePath, "ab")
-            txt.write(str(now) + ", " + tmsi1 + ", " + tmsi2 + ", " + imsi + ", " + imsicountry.encode('utf-8') + ", " + imsibrand.encode('utf-8') + ", " + imsioperator.encode('utf-8') + ", " + mcc + ", " + mnc + ", " + lac + ", " + cell + "\n")
+            txt = open(self.textfilePath, "a")
+            txt.write(f"{str(now)}, {tmsi1}, {tmsi2}, {imsi}, {imsicountry}, {imsibrand}, {imsioperator}, {mcc}, {mnc}, {lac}, {cell}\n")
             txt.close()
 
         if tmsi1 == "":
@@ -205,10 +208,11 @@ class tracker:
 
         if self.sqlite_con:
             self.sqlite_con.execute(
-                u"INSERT INTO observations (stamp, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
-                (now, tmsi1, tmsi2, imsi, imsicountry.encode('utf-8'), imsibrand.encode('utf-8'), imsioperator.encode('utf-8'), mcc, mnc, lac, cell)
+               u"INSERT INTO observations (stamp, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);",
+               (now, tmsi1, tmsi2, imsi, imsicountry, imsibrand, imsioperator, mcc, mnc, lac, cell)
             )
             self.sqlite_con.commit()
+            pass
 
         if self.mysql_cur:
             print("saving data to db...")
@@ -219,7 +223,7 @@ class tracker:
             self.mysql_con.commit()
 
     def header(self):
-        print("{:7s} ; {:10s} ; {:10s} ; {:17s} ; {:12s} ; {:10s} ; {:21s} ; {:4s} ; {:5s} ; {:6s} ; {:6s} ; {:s}".format("Nb IMSI", "TMSI-1", "TMSI-2", "IMSI", "country", "brand", "operator", "MCC", "MNC", "LAC", "CellId", "Timestamp"))
+        print(f"{'Nb IMSI':7s} ; {'TMSI-1':10s} ; {'TMSI-2':10s} ; {'IMSI':17s} ; {'country':16s} ; {'brand':14s} ; {'operator':21s} ; {'MCC':4s} ; {'MNC':5s} ; {'LAC':6s} ; {'CellId':6s} ; {'Timestamp':s}")
 
     def register_imsi(self, arfcn, imsi1="", imsi2="", tmsi1="", tmsi2="", p=""):
         do_print = False
@@ -607,7 +611,7 @@ if __name__ == "__main__":
     if options.sniff:
         from scapy.all import sniff, UDP
         imsitracker.header()
-        sniff(iface=options.iface, filter="port {} and not icmp and udp".format(options.port), prn=find_imsi_from_pkt, store=0)
+        sniff(iface=options.iface, filter=f"port {options.port} and not icmp and udp", prn=find_imsi_from_pkt, store=0)
     else:
         imsitracker.header()
         udpserver(port=options.port, prn=find_imsi)
