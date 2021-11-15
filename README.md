@@ -190,7 +190,7 @@ Use `db-example.sql` to create your DB.
 cp .env.dist .env
 nano .env
 # set your config
-sudo apt instal python-decouple python3-mysqldb
+sudo apt install python-decouple python3-mysqldb
 ```
   
 ```bash
