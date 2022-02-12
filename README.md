@@ -86,10 +86,10 @@ echo 'export PYTHONPATH=/usr/local/lib/python3/dist-packages/:$PYTHONPATH' >> ~/
 ### Install gr-gsm with Docker
 
 ```bash
+sudo xhost +local:docker
 docker pull atomicpowerman/imsi-catcher
 docker run -ti --net=host -e DISPLAY=$DISPLAY --privileged -v /dev/bus/usb:/dev/bus/usb  atomicpowerman/imsi-catcher bash
 ```
-TODO : fix DISPLAY error  
 Run all `grgsm_*` in this docker.   
   
 
