@@ -44,7 +44,7 @@ CREATE TABLE `imsi` (
 --
 
 INSERT INTO `imsi` (`id`, `tmsi1`, `tmsi2`, `imsi`, `stamp`, `deviceid`, `cell_id`, `lac`, `mcc`, `mnc`) VALUES
-(4, NULL, NULL, '510 10 1552980000', '2020-05-11 15:00:18', 'rtl', '0000', '000', '510', '10')
+(4, NULL, NULL, '510 10 1552980000', '2020-05-11 15:00:18', 'rtl', '0000', '000', '510', '10');
 
 --
 -- Indexes for dumped tables
