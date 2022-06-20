@@ -1,12 +1,3 @@
--- phpMyAdmin SQL Dump
--- version 4.5.4.1deb2ubuntu2.1
--- http://www.phpmyadmin.net
---
--- Host: localhost
--- Generation Time: May 11, 2020 at 03:17 PM
--- Server version: 5.7.30-0ubuntu0.16.04.1
--- PHP Version: 7.0.33-0ubuntu0.16.04.14
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
@@ -44,7 +35,7 @@ CREATE TABLE `imsi` (
 --
 
 INSERT INTO `imsi` (`id`, `tmsi1`, `tmsi2`, `imsi`, `stamp`, `deviceid`, `cell_id`, `lac`, `mcc`, `mnc`) VALUES
-(4, NULL, NULL, '510 10 1552980000', '2020-05-11 15:00:18', 'rtl', '0000', '000', '510', '10');
+(NULL, NULL, NULL, NULL, NULL, 'rtl', NULL, NULL, NULL, NULL);
 
 --
 -- Indexes for dumped tables
