@@ -34,8 +34,8 @@ CREATE TABLE `imsi` (
 -- Dumping data for table `imsi`
 --
 
-INSERT INTO `imsi` (`id`, `tmsi1`, `tmsi2`, `imsi`, `stamp`, `deviceid`, `cell_id`, `lac`, `mcc`, `mnc`) VALUES
-(NULL, NULL, NULL, NULL, NULL, 'rtl', NULL, NULL, NULL, NULL);
+-- INSERT INTO `imsi` (`id`, `tmsi1`, `tmsi2`, `imsi`, `stamp`, `deviceid`, `cell_id`, `lac`, `mcc`, `mnc`) VALUES
+-- (NULL, NULL, NULL, NULL, NULL, 'rtl', NULL, NULL, NULL, NULL);
 
 --
 -- Indexes for dumped tables
