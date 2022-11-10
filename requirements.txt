@@ -1,0 +1,10 @@
+asn1crypto==0.24.0
+cryptography==2.1.4
+idna==2.6
+keyring==10.6.0
+keyrings.alt==3.0
+pycrypto==2.6.1
+pygobject==3.26.1
+pyxdg==0.25
+SecretStorage==2.3.1
+six==1.11.0
