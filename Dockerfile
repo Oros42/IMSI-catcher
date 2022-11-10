@@ -15,7 +15,7 @@ RUN mkdir gr-gsm && cd gr-gsm && git init && git remote add origin https://git.o
 RUN cd gr-gsm && mkdir build && cd build && cmake .. && make && make install && ldconfig
 
 # IMSI-catcher script
-RUN apt-get install -y python-numpy python-scipy python-scapy
+RUN apt-get install -y python-numpy python-scipy python-scapy python3 python3-distutil
 
 ADD . /imsi-catcher/
 
