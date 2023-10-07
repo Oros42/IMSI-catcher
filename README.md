@@ -42,6 +42,8 @@ You have the choice with 2 types of gr-gsm's install : in your OS or with docker
   
 ### Install gr-gsm in your OS (recommended)
 
+#### Ubuntu
+
 ```bash
 sudo apt-get install -y \
     cmake \
@@ -60,6 +62,27 @@ sudo apt-get install -y \
     liborc-0.4-dev \
     swig
 ```
+
+#### Fedora
+
+```bash
+$ sudo dnf install -y lksctp-tools-devel libmnl-devel gnutls-devel libusb1-devel pcsc-lite-devel liburing-devel osmo osmocom libosmocore-devel pybind11-devel pybind-devel gmp-devel gnuradio boost-devel mpir-devel spdlog-devel cmake autoconf automake libtool pkgconf gcc-c++ python-docutils cppunit-devel swig doxygen log4cpp-devel gnuradio-devel gr-osmosdr orc-devel "@Development Tools"
+
+$ git clone https://github.com/osmocom/libosmocore --depth 1
+
+$ cd libosmocore
+
+$ autoreconf -i
+
+$ ./configure
+
+$ make
+
+$ sudo make install
+
+$ cd ../
+```
+
 ```bash
 gnuradio-config-info -v
 ```
