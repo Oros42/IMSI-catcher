@@ -15,11 +15,19 @@ stations and phones in the area as possible, by spreading across as
 many operators as possible.
 """
 
-import imp
+import importlib.util
+import importlib.machinery
 from optparse import OptionParser
 import subprocess
 import sys
 import distutils.spawn
+
+def load_source(modname, filename):
+    loader = importlib.machinery.SourceFileLoader(modname, filename)
+    spec = importlib.util.spec_from_file_location(modname, filename, loader=loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
 
 def find_gsm_bases():
 	grgsm_scanner_path = distutils.spawn.find_executable("grgsm_scanner")
@@ -27,7 +35,7 @@ def find_gsm_bases():
 		print("Error : Please install gr-gsm")
 		exit(1)
         
-	scanner = imp.load_source('scanner', grgsm_scanner_path)
+	scanner = load_source('scanner', grgsm_scanner_path)
 	sys.modules['scanner'] = scanner
 	(options, args) = scanner.argument_parser().parse_args() #FIXME conflic with argument_parser line 93
 	list = scanner.do_scan(options.samp_rate, options.band, options.speed,
