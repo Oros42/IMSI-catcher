@@ -83,6 +83,13 @@ sudo ldconfig
 echo 'export PYTHONPATH=/usr/local/lib/python3/dist-packages/:$PYTHONPATH' >> ~/.bashrc
 ```
 
+### Importlib vs Imp
+Beginning with Python 3.1, Imp is replaced by importlib. Imp is deprecated in Python 3.11, with the new requirements met as follows.
+
+```bash
+pip install importlib
+```
+
 ### Install gr-gsm with Docker
 
 ```bash
