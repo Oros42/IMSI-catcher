@@ -87,6 +87,7 @@ echo 'export PYTHONPATH=/usr/local/lib/python3/dist-packages/:$PYTHONPATH' >> ~/
 Beginning with Python 3.1, Imp is replaced by importlib. Imp is deprecated in Python 3.11, with the new requirements met as follows.
 
 ```bash
+apt install python3-pip
 pip install importlib
 ```
 
