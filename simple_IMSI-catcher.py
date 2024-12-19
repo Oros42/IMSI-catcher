@@ -291,7 +291,7 @@ class tracker:
                 if tmsi1 and tmsi1 not in self.tmsis:
                     do_print = True
                     self.tmsis[tmsi1] = ""
-                if tmsi1 and tmsi1 not in self.tmsis:
+                if tmsi2 and tmsi2 not in self.tmsis:
                     do_print = True
                     self.tmsis[tmsi2] = ""
                 if do_print:
