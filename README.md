@@ -49,7 +49,7 @@ sudo apt-get install -y \
     libtool \
     pkg-config \
     build-essential \
-    python-docutils \
+    python3-docutils \
     libcppunit-dev \
     swig \
     doxygen \
