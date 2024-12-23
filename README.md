@@ -63,11 +63,15 @@ sudo apt-get install -y \
 ```bash
 gnuradio-config-info -v
 ```
-if >= 3.8  
+if >= 3.10 (read this [AskUbuntu answer](https://askubuntu.com/a/1436119/) for details):
+```bash
+git clone -b maint-3.10_with_multiarfcn https://github.com/bkerler/gr-gsm
+```
+else if >= 3.8:
 ```bash
 git clone -b maint-3.8 https://github.com/velichkov/gr-gsm.git
 ```
-else (3.7)  
+else (3.7):
 ```bash
 git clone https://git.osmocom.org/gr-gsm
 ```
