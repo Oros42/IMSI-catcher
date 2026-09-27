@@ -34,7 +34,7 @@ imsitracker = None
 class tracker:
     imsistate = {}
     # phones
-    imsis = []  # [IMSI,...]
+    imsis = set()  # {IMSI,...}
     tmsis = {}  # {TMSI:IMSI,...}
     nb_IMSI = 0  # count the number of IMSI
 
@@ -58,6 +58,10 @@ class tracker:
     output_function = None
 
     def __init__(self):
+        self.imsistate = {}
+        self.imsis = set()  # {IMSI,...}
+        self.tmsis = {}  # {TMSI:IMSI,...}
+        self.nb_IMSI = 0  # count the number of IMSI
         self.load_mcc_codes()
         self.track_this_imsi("")
         self.output_function = self.output
@@ -239,7 +243,7 @@ class tracker:
             if imsi1 not in self.imsis:
                 # new IMSI
                 do_print = True
-                self.imsis.append(imsi1)
+                self.imsis.add(imsi1)
                 self.nb_IMSI += 1
                 n = self.nb_IMSI
             if self.tmsis and tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi1):
@@ -255,7 +259,7 @@ class tracker:
             if imsi2 not in self.imsis:
                 # new IMSI
                 do_print = True
-                self.imsis.append(imsi2)
+                self.imsis.add(imsi2)
                 self.nb_IMSI += 1
                 n = self.nb_IMSI
             if self.tmsis and tmsi1 and (tmsi1 not in self.tmsis or self.tmsis[tmsi1] != imsi2):
